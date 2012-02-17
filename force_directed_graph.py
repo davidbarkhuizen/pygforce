@@ -96,10 +96,62 @@ class ForceDirectedGraph(object):
             
         return (Fx_net, Fy_net)
 
+    def net_spring_force_at_node(self, tag):
+        
+        Fx_net = 0
+        Fy_net = 0
+        
+        for (edge_tag_1, edge_tag_2) in self.graph.edges():
+            
+            other_tags = [edge_tag_1, edge_tag_2]
+            
+            if tag not in other_tags:
+                continue
+           
+            other_tag = [t for t in other_tags if t != tag][0]
+            
+            r2 = math.pow((tag.x - other_tag.x), 2) + math.pow(tag.y - other_tag.y, 2)
+            r = math.sqrt(r2)
+            
+            # CONSTANTS
+            #
+            k = 0.01
+            equilibrium_displacement = 40
+            
+            scalar_force = - k * (equilibrium_displacement - r)
+            
+            # DISTINGUISH BETWEEN PUSH & PULL VECTORS
+            #            
+            if scalar_force < 0:
+                (tag_A, tag_B) = (tag, other_tag)                
+            else:
+                (tag_A, tag_B) = (other_tag, tag)
+            
+            delta_x = tag_A.x - tag_B.x
+            delta_y = tag_A.y - tag_B.y
+            
+            sin_theta = delta_y / r
+            cos_theta = delta_x / r
+    
+            Fy = scalar_force * sin_theta
+            Fx = scalar_force * cos_theta
+            
+            Fy_net = Fy_net + Fy
+            Fx_net = Fx_net + Fx
+            
+        return (Fx_net, Fy_net)
+
     def displacement_at_node(self, tag):
         '''
         '''        
-        displacement = tag.net_electrostatic_force
+        eX, eY = tag.net_electrostatic_force
+        sX, sY = tag.net_spring_force
+        
+        nX = eX + sX
+        nY = eY + sY 
+        
+        displacement = (nX, nY)
+        
         return displacement    
 
     def iterate(self, pixmap, gc, style):
@@ -114,6 +166,9 @@ class ForceDirectedGraph(object):
 
         for tag in self.graph.nodes():
             tag.net_electrostatic_force = self.net_electrostatic_force_at_node(tag)
+
+        for tag in self.graph.nodes():
+            tag.net_spring_force = self.net_spring_force_at_node(tag)
         
         for tag in self.graph.nodes():
             tag.displacement = self.displacement_at_node(tag)
