@@ -17,7 +17,7 @@ class GEM(object):
         '''
         
         self.graph = graph
-        self.force_directed_graph = ForceDirectedGraph(graph=self.graph)   
+        self.force_directed_graph = ForceDirectedGraph(WINDOW_WIDTH, WINDOW_HEIGHT, graph=self.graph)   
         
         self.b1_down = False
         self.b2_down = False
