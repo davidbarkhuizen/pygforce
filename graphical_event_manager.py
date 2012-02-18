@@ -2,8 +2,8 @@ import random
 import gtk
 
 WIN_TITLE = 'Force-Directed Graphs'
-WINDOW_WIDTH = 640
-WINDOW_HEIGHT = 480
+WINDOW_WIDTH = 900
+WINDOW_HEIGHT = int(float(WINDOW_WIDTH) / 1.6)
 
 from force_directed_graph import *
 
@@ -72,27 +72,37 @@ class GEM(object):
         
         self.w, self.h = area.window.get_size()
         
-        #for i in dir(area.window): print(i)
         self.started = True
 
         return True                
         
     def button_press_event(self, widget, event):                    
-        '''
-        if (event.button == 1):            
+
+        if (event.button == 1):                        
             self.b1_x = event.x
             self.b1_y = event.y
             self.b1_down = True
+            
+            # translated x,y for button press canvaS x,y
+            # check which nodes are within selection volume
+            # find the closest of the nodes
+            # select it
+            # change node colour based on selection
+            #     potentially change colour of adjacent edges, and neighbout nodes
+        
         elif (event.button == 3):            
             self.b3_z = event.x
             self.b3_down = True
+        
         elif (event.button == 2):
             self.b2_down = True  
+        
         elif (event.button == 4):
-            print(4)
+            pass
+        
         elif (event.button == 5):
-            print(5)
-        '''
+            pass
+
         return True
 
     def motion_notify_event(self, widget, event):
@@ -100,47 +110,37 @@ class GEM(object):
         record mouse movement, calc deltas
         call self.force_directed_graph.move(d_x, d_y, d_z), passing deltas
         '''
-        '''
+
         if (self.b1_down == True):
             x = event.x
             y = event.y
             
             d_x = x - self.b1_x
             d_y = y - self.b1_y
-            d_z = 0
             
             self.b1_x = x
             self.b1_y = y
 
-            self.force_directed_graph.move(d_x, d_y, d_z)
+            # self.force_directed_graph.move(d_x, d_y, d_z)
         
         elif (self.b3_down == True):
-        
-            z = event.x
-            
-            d_z = z - self.b3_z
-            
-            d_y = 0
-            d_x = 0
-            
-            self.b3_z = z
+            pass
+            # self.force_directed_graph.move(d_x, d_y, d_z)
 
-            self.force_directed_graph.move(d_x, d_y, d_z)
-        '''
         return True
         
     def button_released_event(self, widget, event):   
         '''
         toggle status of b1/b2/b3_down
         '''             
-        '''
+
         if (event.button == 1):
             self.b1_down = False
         elif (event.button == 2):
             self.b2_down = False
         elif (event.button == 3):
             self.b3_down = False     
-        '''
+
         return True   
      
 
@@ -157,6 +157,18 @@ class GEM(object):
         if (self.started != True):
             return True
         
+        print('\n'*80)
+        if self.b1_down == True:
+            
+            
+            trans_x = self.b1_x - self.force_directed_graph.X_OFFSET
+            trans_y = self.b1_x - self.force_directed_graph.Y_OFFSET
+        
+            print('pointer - (%i, %i) -> (%i, %i)' % (self.b1_x, self.b1_y, trans_x, trans_y))
+        
+        for tag in sorted(self.graph.nodes(), key = lambda x : x.idx):
+            print('%i @ (%.2f, %.2f)' % (tag.idx, tag.x, tag.y))        
+        
         # construct pixmap
         pixmap = gtk.gdk.Pixmap(self.da.window, self.gw, self.gh, depth=-1)
         # draw white background
@@ -166,7 +178,8 @@ class GEM(object):
         self.force_directed_graph.iterate(pixmap, self.gc, self.style)        
         
         # draw pixmap to window
-        self.area.window.draw_drawable(self.gc, pixmap, 0, 0, 0, 0, -1, -1)          
+        self.area.window.draw_drawable(self.gc, pixmap, 0, 0, 0, 0, -1, -1)  
+                
         # show changes
         self.area.show()
       

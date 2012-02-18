@@ -5,7 +5,8 @@ import networkx as nx
 import gobject
 import gtk
 
-from force_directed_graph import ForceDirectedGraph, Tag
+from force_directed_graph import ForceDirectedGraph
+from node_tag import Tag
 from graphical_event_manager import GEM
 
 CANVAS_WIDTH = 100
@@ -16,24 +17,16 @@ def gen_xy():
     y = (- float(CANVAS_HEIGHT) / 2.0) + (random.random() * float(CANVAS_HEIGHT))
     return (x,y)
 
-
-def generate_graph():
+def generate_graph(p=11, max_edges_to_create_per_node_per_pass=2):
+    '''
+    generate a semi-random graph of size p
     
-    g = nx.Graph()
-	
-	# minimal_connected_3
-#    x,y = gen_xy()
-#    A = Tag(x, y, '')
-#    g.add_node(A)
-#    
-#    for i in range(7):
-#        (x,y) = gen_xy()
-#        tag = Tag(x, y, '')
-#        g.add_node(tag)
-#   
-
-    p = 11
-    max_degree = 2
+    generate p vertices, with random x,y co-ords
+    for each vertex:
+      randomly add at most max_edges_to_create_per_node_per_pass new edges
+    '''
+    
+    g = nx.Graph()	
     
     nodes = []
     
@@ -46,30 +39,16 @@ def generate_graph():
     for i in range(p):
         node = nodes[i]
         
-        used_neighbours = []
-        for j in range(random.randint(1, max_degree)):
+        for j in range(random.randint(1, max_edges_to_create_per_node_per_pass)):
         
-            got_number = False
-            while got_number == False:
+            new_edge_added = False
+            while new_edge_added == False:
                 z = random.randint(0, len(nodes) - 1)
                 if nodes[z] != node:
-                    if nodes[z] not in used_neighbours:
+                    if ((nodes[z], node) not in g.edges()) and ((node, nodes[z]) not in g.edges()):
                         g.add_edge(node, nodes[z])
-                        got_number = True
-    
-#    (x,y) = gen_xy()
-#    B = Tag(x, y, '')
-#    g.add_node(B)
-#    
-#    g.add_edge(A, B)
-#    
-#    for node in [A, B]:
-#    	for i in range(2):
-#    		(x,y) = gen_xy()
-#    		tag = Tag(x, y, '')
-#    		g.add_node(tag)
-#    		g.add_edge(node, tag)
-    
+                        new_edge_added = True
+   
     return g
 
 def main():

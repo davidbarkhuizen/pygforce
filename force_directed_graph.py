@@ -1,75 +1,26 @@
 import math
-from points import *
-
-class Tag(object):
-
-    last_used_idx = 0
-    @classmethod
-    def pop_unused_idx(cls):
-        new_idx = cls.last_used_idx + 1
-        cls.last_used_idx = new_idx
-        return new_idx        
-    
-    def __init__(self, x, y, label):
-    
-        self.idx = Tag.pop_unused_idx()
-        
-        self.x = x
-        self.y = y
-        
-        self.label = label
-        
-        self.net_electrostatic_force = (0, 0)
-        self.net_spring_force = (0, 0)
-        self.displacement = (0, 0)
-        self.velocity = (0, 0)
-
-    def __str__(self):
-        
-        s = ('%i = %s' % (self.idx, self.label)) + '\n'
-        s = s + ('(x,y) = (%f,%f)' % (self.x, self.y)) + '\n'
-        
-        (Fx, Fy) = self.net_electrostatic_force
-        s = s + ('electro-static Fx, Fy = %f, %f' % (Fx, Fy)) + '\n'
-        
-        (Fx, Fy) = self.net_spring_force
-        s = s + ('spring Fx, Fy = %f, %f' % (Fx, Fy)) + '\n'    
-
-        (dx, dy) = self.displacement
-        s = s + ('displacement dx, dy = %f, %f' % (dx, dy)) + '\n'        
-        
-        return s
+from points import Point2D
 
 class ForceDirectedGraph(object):
     
-    time_step = 0.625
-    damping = 0.95
+    TIME_STEP = 0.8
+    FRICTION = 0.95
     
-    rad_const = math.pi / 180.0  
-    
-    def rad(self, theta):
-        return theta * ForceDirectedGraph.rad_const    
+    SPRING_CONSTANT = 0.1
+    EQUILIBRIUM_DISPLACEMENT = 20
         
-    def __init__(self, X_OFFSET, Y_OFFSET, graph=None, ):
+    def __init__(self, CANVAS_WIDTH, CANVAS_HEIGHT, graph=None, ):
         
         self.graph = graph
 
-        self.X_OFFSET = X_OFFSET / 2.0
-        self.Y_OFFSET = Y_OFFSET / 2.0
+        self.X_OFFSET = CANVAS_WIDTH / 2.0
+        self.Y_OFFSET = CANVAS_HEIGHT / 2.0
 
         self.points = []   
         self.edges = []
         
         self.nodes = self.graph.nodes() 
         
-        self.x_off = X_OFFSET / 2.0
-        self.y_off = Y_OFFSET / 2.0
-        self.z_off = 50.0
-
-        self.z_deg = 0
-        self.x_deg = 0
-        self.y_deg = 0
-
     def translate(self, x, y):
         
         tX = x + self.X_OFFSET
@@ -128,7 +79,7 @@ class ForceDirectedGraph(object):
             q_B = 10.0
             k = 100.0
 
-            scalar_force = k * q_A * q_B / r2
+            scalar_force = k * q_A * q_B / math.pow(r, 1.9)
             
             Fy = scalar_force * sin_theta
             Fx = scalar_force * cos_theta
@@ -157,10 +108,11 @@ class ForceDirectedGraph(object):
             
             # CONSTANTS
             #
-            k = 0.1
-            equilibrium_displacement = 40
-            
-            scalar_force = - k * (equilibrium_displacement - r)
+           
+            k = ForceDirectedGraph.SPRING_CONSTANT
+            l = ForceDirectedGraph.EQUILIBRIUM_DISPLACEMENT
+           
+            scalar_force = - k * (l - r)
             
             # DISTINGUISH BETWEEN PUSH & PULL VECTORS
             #            
@@ -213,8 +165,11 @@ class ForceDirectedGraph(object):
         
         (xo, yo) = tag.velocity
         
-        xn = xo + ForceDirectedGraph.time_step * xf * ForceDirectedGraph.damping
-        yn = yo + ForceDirectedGraph.time_step * yf * ForceDirectedGraph.damping 
+        friction = ForceDirectedGraph.FRICTION 
+        time_step = ForceDirectedGraph.TIME_STEP
+        
+        xn = (xo * friction) + xf * time_step 
+        yn = (yo * friction) + yf * time_step
 
         return (xn, yn)
 
@@ -232,8 +187,7 @@ class ForceDirectedGraph(object):
             tag.net_electrostatic_force = self.net_electrostatic_force_at_node(tag)
 
         for tag in self.graph.nodes():
-            tag.net_spring_force = self.net_spring_force_at_node(tag)
-        
+            tag.net_spring_force = self.net_spring_force_at_node(tag)        
         
         for tag in self.graph.nodes():
             tag.velocity = self.velocity_at_tag(tag)
@@ -244,7 +198,8 @@ class ForceDirectedGraph(object):
 #        print('\n'*80)
 #        for tag in self.graph.nodes():
 #            print(tag)
-#        
+#
+        # ADJUST POSITION
         for tag in self.graph.nodes():
             (dx, dy) = tag.displacement
             tag.x = tag.x + dx
