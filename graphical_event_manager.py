@@ -2,12 +2,9 @@ from random import randint
 import gtk
 import time
 
-WIN_TITLE = 'Force-Directed Graphs'
-WINDOW_WIDTH = 900
-WINDOW_HEIGHT = int(float(WINDOW_WIDTH) / 1.6)
-NODE_LABEL_VERT_SPACING = 5
+from constants import *
 
-from force_directed_graph import ForceDirectedGraph, AREA_HEIGHT, AREA_WIDTH
+from force_directed_graph import ForceDirectedGraph
 from graph_manipulator import remove_node_from_graph_at_random, add_node_to_graph_at_random, generate_graph
 
 class GEM(object):
@@ -16,16 +13,12 @@ class GEM(object):
     framework for handling simple process driven and interactive graphics
     '''    
     
-    # time between random removal of node
-    #
-    GENERATION_INTERVAL = 5.0 # seconds
-    
     def __init__(self, graph=None):
         '''
         '''
         
         self.graph = graph
-        self.force_directed_graph = ForceDirectedGraph(WINDOW_WIDTH, WINDOW_HEIGHT, graph=self.graph)   
+        self.force_directed_graph = ForceDirectedGraph(graph=self.graph)   
         self.last_generation_timestamp = None        
         
         self.b1_down = False
@@ -44,8 +37,8 @@ class GEM(object):
         
         self.win = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.win.set_title(WIN_TITLE)
-        self.gw = WINDOW_WIDTH
-        self.gh = WINDOW_HEIGHT #int(float(self.gw) / 1.618)
+        self.gw = W_1
+        self.gh = H_1 #int(float(self.gw) / 1.618)
         self.win.resize(self.gw, self.gh)
         self.win.set_position(gtk.WIN_POS_CENTER)
         self.win.connect('destroy', gtk.main_quit)
@@ -175,9 +168,11 @@ class GEM(object):
         
         now = time.clock()
         
+        # HANDLE GENERATION ZERO
         if not self.last_generation_timestamp:
             self.last_generation_timestamp = time.clock()
-        elif now - self.last_generation_timestamp > GEM.GENERATION_INTERVAL:
+        # HANDLE SUBSEQUENT GENERATIONS
+        elif now - self.last_generation_timestamp > GENERATION_INTERVAL:
             
             node_count = len(self.graph.nodes())
             
@@ -186,7 +181,7 @@ class GEM(object):
             
             # LOWER BOUND ON NODE COUNT
             if node_count <= min_node_count:
-                new_node = add_node_to_graph_at_random(self.graph, AREA_WIDTH, AREA_HEIGHT)
+                new_node = add_node_to_graph_at_random(self.graph, W_0, H_0)
             # UPPER BOUND ON NODE COUNT
             elif node_count >= max_node_count:
                 remove_node_from_graph_at_random(self.graph)
@@ -196,15 +191,14 @@ class GEM(object):
                 if x % 2 == 0:            
                     remove_node_from_graph_at_random(self.graph)
                 else:
-                    new_node = add_node_to_graph_at_random(self.graph, AREA_WIDTH, AREA_HEIGHT)
+                    new_node = add_node_to_graph_at_random(self.graph)
                 self.last_generation_timestamp = now
         
         if self.mx and self.my:
+            reversed_x, reversed_y = self.force_directed_graph.reverse(self.mx, self.my, W_0, H_0, W_1, H_1)
+            print('0 = (%i, %i), 1 = (%i, %i)' % (reversed_x, reversed_y, self.mx, self.my))
         
-            reversed_x = self.mx - self.force_directed_graph.X_OFFSET
-            reversed_y = self.my - self.force_directed_graph.Y_OFFSET
-            
-            print('pointer - (%i, %i) -> (%i, %i)' % (self.mx, self.my, reversed_x, reversed_y))
+        print('(W0, H0) = %i, %i | (W1, H1) = %i, %i' % (W_0, H_0, W_1, H_1))
         
         print(('Idx').rjust(5) + ('x').rjust(10) + ' ' + ('y').rjust(10))
         for tag in sorted(self.graph.nodes(), key = lambda x : x.idx):
@@ -213,7 +207,9 @@ class GEM(object):
             y = tag.position.y
             idx = tag.idx
             
-            print(('%i' % idx).rjust(5) + ' ' + ('%.2f' % x).rjust(10) + ' ' + ('%.2f' % y).rjust(10))
+            tx, ty = self.force_directed_graph.translate(x, y, W_0, H_0, W_1, H_1)
+            
+            print(('%i' % idx).rjust(5) + ' ' + ('%.2f' % x).rjust(10) + ' ' + ('%.2f' % y).rjust(10)+ ' ' + ('%.2f' % tx).rjust(10) + ' ' + ('%.2f' % ty).rjust(10))
         
         # construct pixmap
         pixmap = gtk.gdk.Pixmap(self.da.window, self.gw, self.gh, depth=-1)

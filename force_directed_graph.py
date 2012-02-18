@@ -2,30 +2,26 @@ import math
 import gtk
 from points import Point2D
 
-AREA_WIDTH = 100
-AREA_HEIGHT = (100.0 / 1.6) * 1
+from constants import *
 
 class ForceDirectedGraph(object):
         
-    TIME_STEP = 0.8
-    FRICTION = 0.95
-    
-    SPRING_CONSTANT = 0.1
-    EQUILIBRIUM_DISPLACEMENT = 30
-        
-    def __init__(self, CANVAS_WIDTH, CANVAS_HEIGHT, graph=None, ):
-        
+    def __init__(self, graph=None, ):
         self.graph = graph
 
-        self.X_OFFSET = CANVAS_WIDTH / 2.0
-        self.Y_OFFSET = CANVAS_HEIGHT / 2.0
+    def translate(self, x0, y0, w0, h0, w1, h1):
+        
+        x1 = (float(w1) / 2.0) + float(x0) * (float(w1) / float(w0))
+        y1 = (float(h1) / 2.0) - float(y0) * (float(h1) / float(h0)) 
+        
+        return (x1, y1)
 
-    def translate(self, x, y):
+    def reverse(self, x1, y1, w0, h0, w1, h1):
         
-        tX = x + self.X_OFFSET
-        tY = y + self.Y_OFFSET
+        x0 = (float(x1) - ((float(w1) / 2.0))) * (float(w0) / float(w1))
+        y0 = ((float(h1) / 2.0) - float(y1)) * (float(h0) / float(h1)) 
         
-        return (tX, tY)
+        return (x0, y0)
 
     def draw_to_pixmap(self, pixmap, gc, style, node_label_vert_spacing):
         '''
@@ -122,8 +118,8 @@ class ForceDirectedGraph(object):
             # CONSTANTS
             #
            
-            k = ForceDirectedGraph.SPRING_CONSTANT
-            l = ForceDirectedGraph.EQUILIBRIUM_DISPLACEMENT
+            k = SPRING_CONSTANT
+            l = EQUILIBRIUM_DISPLACEMENT
            
             scalar_force = - k * (l - r)
             
@@ -178,8 +174,8 @@ class ForceDirectedGraph(object):
         
         (xo, yo) = tag.velocity
         
-        friction = ForceDirectedGraph.FRICTION 
-        time_step = ForceDirectedGraph.TIME_STEP
+        friction = FRICTION 
+        time_step = TIME_STEP
         
         xn = (xo * friction) + xf * time_step 
         yn = (yo * friction) + yf * time_step
@@ -188,13 +184,12 @@ class ForceDirectedGraph(object):
 
     def iterate(self, pixmap, gc, style, node_label_vertical_spacing):
         '''
+        for each node
+            calc net electrostatic force
+            calc net spring force
+            calc displacement [impulse]
+            effect displacements
         '''
-        # for each node
-        #   calc net electrostatic force
-        #   calc net spring force
-        #   calc displacement [impulse]
-        #   effect displacements
-        # generate point array
 
         for tag in self.graph.nodes():
             tag.net_electrostatic_force = self.net_electrostatic_force_at_node(tag)
@@ -208,10 +203,6 @@ class ForceDirectedGraph(object):
         for tag in self.graph.nodes():
             tag.displacement = self.displacement_at_node(tag)
         
-#        print('\n'*80)
-#        for tag in self.graph.nodes():
-#            print(tag)
-#
         # ADJUST POSITION
         for tag in self.graph.nodes():
             (dx, dy) = tag.displacement
@@ -221,6 +212,6 @@ class ForceDirectedGraph(object):
         # TRANSLATE TO CANVAS
         #
         for node in self.graph.nodes():
-            (node.translated_position.x, node.translated_position.y) = self.translate(node.position.x, node.position.y)
+            (node.translated_position.x, node.translated_position.y) = self.translate(node.position.x, node.position.y, W_0, H_0, W_1, H_1)
         
         self.draw_to_pixmap(pixmap, gc, style, node_label_vertical_spacing)

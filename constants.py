@@ -1,0 +1,22 @@
+WIN_TITLE = 'Force-Directed Graphs'
+
+W_0 = 1000
+H_0 = int(float(W_0) / 1.6)
+
+W_1 = 900
+H_1 = int(float(W_1) / 1.6)
+
+NODE_LABEL_VERT_SPACING = 5
+
+TIMER_TICK_PERIOD = 50
+GENERATION_INTERVAL = 15.0 # seconds
+
+SPRING_CONSTANT = 0.1
+EQUILIBRIUM_DISPLACEMENT = 30
+TIME_STEP = 0.8
+FRICTION = 0.95
+
+
+    
+    
+    

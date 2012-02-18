@@ -1,5 +1,7 @@
 from points import Point2D
 
+from constants import *
+
 class Tag(object):
 
     last_used_idx = 0
