@@ -4,8 +4,9 @@ import gtk
 WIN_TITLE = 'Force-Directed Graphs'
 WINDOW_WIDTH = 900
 WINDOW_HEIGHT = int(float(WINDOW_WIDTH) / 1.6)
+NODE_LABEL_VERT_SPACING = 5
 
-from force_directed_graph import *
+from force_directed_graph import ForceDirectedGraph
 
 class GEM(object):
     '''
@@ -175,7 +176,7 @@ class GEM(object):
         pixmap.draw_rectangle(self.style.white_gc, True, 0, 0, self.gw, self.gh)
         
         # call rot.iterate on pixmap        
-        self.force_directed_graph.iterate(pixmap, self.gc, self.style)        
+        self.force_directed_graph.iterate(pixmap, self.gc, self.style, NODE_LABEL_VERT_SPACING)        
         
         # draw pixmap to window
         self.area.window.draw_drawable(self.gc, pixmap, 0, 0, 0, 0, -1, -1)  

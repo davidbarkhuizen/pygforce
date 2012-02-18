@@ -1,13 +1,16 @@
 import math
+
+import gtk
+
 from points import Point2D
 
 class ForceDirectedGraph(object):
-    
+        
     TIME_STEP = 0.8
     FRICTION = 0.95
     
     SPRING_CONSTANT = 0.1
-    EQUILIBRIUM_DISPLACEMENT = 20
+    EQUILIBRIUM_DISPLACEMENT = 30
         
     def __init__(self, CANVAS_WIDTH, CANVAS_HEIGHT, graph=None, ):
         
@@ -44,7 +47,7 @@ class ForceDirectedGraph(object):
             point_B_idx = [i for i in range(len(self.nodes)) if self.nodes[i] == node_B][0]
             self.edges.append((point_A_idx, point_B_idx)) 
 
-    def draw_to_pixmap(self, points, edges, pixmap, gc, style):
+    def draw_to_pixmap(self, points, edges, pixmap, gc, style, node_label_vert_spacing):
         '''
         '''
         # pixmap.draw_line(self.gc, x, y, self.w/2, self.h/2)  
@@ -52,7 +55,10 @@ class ForceDirectedGraph(object):
         n = 2
         for point in points:
             pixmap.draw_rectangle(gc, True, point.x - n, point.y - n, n*2, n*2)
-
+            
+            font = style.get_font()
+            pixmap.draw_text(font, gc, point.x, point.y - node_label_vert_spacing, 'Node Label')
+            
         for (i, j) in edges:
             pixmap.draw_line(gc, points[i].x, points[i].y, points[j].x, points[j].y)
 
@@ -173,7 +179,7 @@ class ForceDirectedGraph(object):
 
         return (xn, yn)
 
-    def iterate(self, pixmap, gc, style):
+    def iterate(self, pixmap, gc, style, node_label_vertical_spacing):
         '''
         '''
         # for each node
@@ -206,4 +212,4 @@ class ForceDirectedGraph(object):
             tag.y = tag.y + dy            
         
         self.generate_points_and_edges()
-        self.draw_to_pixmap(self.points, self.edges, pixmap, gc, style)
+        self.draw_to_pixmap(self.points, self.edges, pixmap, gc, style, node_label_vertical_spacing)
