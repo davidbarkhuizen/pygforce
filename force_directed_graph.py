@@ -1,8 +1,9 @@
 import math
-
 import gtk
-
 from points import Point2D
+
+AREA_WIDTH = 100
+AREA_HEIGHT = (100.0 / 1.6) * 1
 
 class ForceDirectedGraph(object):
         

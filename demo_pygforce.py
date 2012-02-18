@@ -2,12 +2,9 @@ import gobject
 import gtk
 
 from graph_manipulator import generate_graph
-from force_directed_graph import ForceDirectedGraph
+from force_directed_graph import ForceDirectedGraph, AREA_WIDTH, AREA_HEIGHT
 from node_tag import Tag
 from graphical_event_manager import GEM
-
-AREA_WIDTH = 100
-AREA_HEIGHT = (100.0 / 1.6) * 1
 
 TIMER_TICK_PERIOD = 50
 

@@ -1,4 +1,4 @@
-import random
+from random import randint
 import gtk
 import time
 
@@ -7,7 +7,8 @@ WINDOW_WIDTH = 900
 WINDOW_HEIGHT = int(float(WINDOW_WIDTH) / 1.6)
 NODE_LABEL_VERT_SPACING = 5
 
-from force_directed_graph import ForceDirectedGraph
+from force_directed_graph import ForceDirectedGraph, AREA_HEIGHT, AREA_WIDTH
+from graph_manipulator import remove_node_from_graph_at_random, add_node_to_graph_at_random
 
 class GEM(object):
     '''
@@ -17,7 +18,7 @@ class GEM(object):
     
     # time between random removal of node
     #
-    GENERATION_INTERVAL = 5.0 # seconds
+    GENERATION_INTERVAL = 30.0 # seconds
     
     def __init__(self, graph=None):
         '''
@@ -178,7 +179,25 @@ class GEM(object):
             self.last_generation_timestamp = time.clock()
         elif now - self.last_generation_timestamp > GEM.GENERATION_INTERVAL:
             
-            self.last_generation_timestamp = now
+            node_count = len(self.graph.nodes())
+            
+            min_node_count = 5
+            max_node_count = 20
+            
+            # LOWER BOUND ON NODE COUNT
+            if node_count <= min_node_count:
+                new_node = add_node_to_graph_at_random(self.graph, AREA_WIDTH, AREA_HEIGHT)
+            # UPPER BOUND ON NODE COUNT
+            elif node_count >= max_node_count:
+                remove_node_from_graph_at_random(self.graph)
+            # LAISSEZ FAIRE ZONE
+            else:
+                x = randint(1,2)
+                if x % 2 == 0:            
+                    remove_node_from_graph_at_random(self.graph)
+                else:
+                    new_node = add_node_to_graph_at_random(self.graph, AREA_WIDTH, AREA_HEIGHT)
+                self.last_generation_timestamp = now
         
         if self.mx and self.my:
         
