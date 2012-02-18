@@ -8,7 +8,7 @@ WINDOW_HEIGHT = int(float(WINDOW_WIDTH) / 1.6)
 NODE_LABEL_VERT_SPACING = 5
 
 from force_directed_graph import ForceDirectedGraph, AREA_HEIGHT, AREA_WIDTH
-from graph_manipulator import remove_node_from_graph_at_random, add_node_to_graph_at_random
+from graph_manipulator import remove_node_from_graph_at_random, add_node_to_graph_at_random, generate_graph
 
 class GEM(object):
     '''
@@ -18,7 +18,7 @@ class GEM(object):
     
     # time between random removal of node
     #
-    GENERATION_INTERVAL = 30.0 # seconds
+    GENERATION_INTERVAL = 5.0 # seconds
     
     def __init__(self, graph=None):
         '''
