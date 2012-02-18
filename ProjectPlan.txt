@@ -1,0 +1,38 @@
+====================
+PyGForce Feature Set
+====================
+-----------
+IMPLEMENTED
+-----------
+
+Generate Semi-Random Test Graph
+
+@ Each Node, Calculate
+- Net Force @ Each Node
+- Velocity Change & Apply @ 
+- Calc & Effect Displacement
+
+Plot Graph
+
+Run Event Based Time Simulation
+
+-----
+TO DO
+-----
+
+SELECT NODE USING MOUSE
+- indicate selection 
+-- 1 separate info panel - initially in text console, later using widgets
+-- 2 display on primary graph rendering - a change node colour  
+- display info for selected node - full tag info, degreee, neighbours
+
+[MULTIPLE SELECTION]
+
+DRAGGING OF SELECTED NODE
+- translate actual node tag x,y co-ords
+
+- ADDING OF EDGES
+- select two nodes, add edge
+ 
+CENTRE GRAPH
+- calc & use centre of mass
