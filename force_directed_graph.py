@@ -42,7 +42,7 @@ class ForceDirectedGraph(object):
             
             # LABEL / TEXT
             font = style.get_font()
-            pixmap.draw_text(font, gc, x, y - node_label_vert_spacing, 'Node Label')
+            pixmap.draw_text(font, gc, x, y - node_label_vert_spacing, node.label)
             
         # EDGES
         #
