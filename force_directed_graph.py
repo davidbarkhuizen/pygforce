@@ -19,11 +19,6 @@ class ForceDirectedGraph(object):
         self.X_OFFSET = CANVAS_WIDTH / 2.0
         self.Y_OFFSET = CANVAS_HEIGHT / 2.0
 
-        self.points = []   
-        self.edges = []
-        
-        self.nodes = self.graph.nodes() 
-        
     def translate(self, x, y):
         
         tX = x + self.X_OFFSET
@@ -31,55 +26,56 @@ class ForceDirectedGraph(object):
         
         return (tX, tY)
 
-    def generate_points_and_edges(self):
-        
-        self.points = []
-        
-        for node in sorted(self.nodes, key=(lambda x : x.idx)):
-            
-            (tX, tY) = self.translate(node.x, node.y)
-            self.points.append(Point2D(x=int(tX), y = int(tY)))        
-
-        self.edges = []
-
-        for (node_A, node_B) in self.graph.edges():
-            point_A_idx = [i for i in range(len(self.nodes)) if self.nodes[i] == node_A][0]
-            point_B_idx = [i for i in range(len(self.nodes)) if self.nodes[i] == node_B][0]
-            self.edges.append((point_A_idx, point_B_idx)) 
-
-    def draw_to_pixmap(self, points, edges, pixmap, gc, style, node_label_vert_spacing):
+    def draw_to_pixmap(self, pixmap, gc, style, node_label_vert_spacing):
         '''
         '''
         # pixmap.draw_line(self.gc, x, y, self.w/2, self.h/2)  
 
-        n = 2
-        for point in points:
-            pixmap.draw_rectangle(gc, True, point.x - n, point.y - n, n*2, n*2)
+        box_side = 2
+        for node in self.graph.nodes():
             
+            x = int(node.translated_position.x)
+            y = int(node.translated_position.y)
+            
+            # NODE = BOX
+            pixmap.draw_rectangle(gc, True, x - box_side, y - box_side, 2*box_side, 2*box_side)
+            
+            # LABEL / TEXT
             font = style.get_font()
-            pixmap.draw_text(font, gc, point.x, point.y - node_label_vert_spacing, 'Node Label')
+            pixmap.draw_text(font, gc, x, y - node_label_vert_spacing, 'Node Label')
             
-        for (i, j) in edges:
-            pixmap.draw_line(gc, points[i].x, points[i].y, points[j].x, points[j].y)
+        # EDGES
+        #
+        for (i, j) in self.graph.edges():
+            pixmap.draw_line(gc, int(i.translated_position.x), int(i.translated_position.y), int(j.translated_position.x), int(j.translated_position.y))
 
     def net_electrostatic_force_at_node(self, tag_A):
         
-        Fx_net = 0
-        Fy_net = 0
+        Fx_net = 0.0
+        Fy_net = 0.0
         
         for tag_B in self.graph.nodes():
             
             if tag_B == tag_A:
                 continue
            
-            delta_x = tag_A.x - tag_B.x
-            delta_y = tag_A.y - tag_B.y
+            xA = tag_A.position.x
+            yA = tag_A.position.y
+            
+            xB = tag_B.position.x
+            yB = tag_B.position.y
+           
+            delta_x = xA - xB
+            delta_y = yA - yB
             
             r2 = (delta_x * delta_x) + (delta_y * delta_y)
             r = math.sqrt(r2)
-
+            
+            if r == 0.0:
+                continue
+            
             sin_theta = delta_y / r
-            cos_theta = delta_x / r
+            cos_theta = delta_x / r            
 
             q_A = 10.0
             q_B = 10.0
@@ -100,6 +96,9 @@ class ForceDirectedGraph(object):
         Fx_net = 0
         Fy_net = 0
         
+        x_tag = tag.position.x
+        y_tag = tag.position.y        
+        
         for (edge_tag_1, edge_tag_2) in self.graph.edges():
             
             other_tags = [edge_tag_1, edge_tag_2]
@@ -109,8 +108,15 @@ class ForceDirectedGraph(object):
            
             other_tag = [t for t in other_tags if t != tag][0]
             
-            r2 = math.pow((tag.x - other_tag.x), 2) + math.pow(tag.y - other_tag.y, 2)
+            x_other = other_tag.position.x
+            y_other = other_tag.position.y
+            
+            
+            r2 = math.pow((x_tag - x_other), 2) + math.pow(y_tag - y_other, 2)
             r = math.sqrt(r2)
+            
+            if r == 0.0:
+                continue
             
             # CONSTANTS
             #
@@ -127,8 +133,8 @@ class ForceDirectedGraph(object):
             else:
                 (tag_A, tag_B) = (other_tag, tag)
             
-            delta_x = tag_A.x - tag_B.x
-            delta_y = tag_A.y - tag_B.y
+            delta_x = tag_A.position.x - tag_B.position.x
+            delta_y = tag_A.position.y - tag_B.position.y
             
             sin_theta = delta_y / r
             cos_theta = delta_x / r
@@ -208,8 +214,12 @@ class ForceDirectedGraph(object):
         # ADJUST POSITION
         for tag in self.graph.nodes():
             (dx, dy) = tag.displacement
-            tag.x = tag.x + dx
-            tag.y = tag.y + dy            
+            tag.position.x = tag.position.x + dx
+            tag.position.y = tag.position.y + dy            
         
-        self.generate_points_and_edges()
-        self.draw_to_pixmap(self.points, self.edges, pixmap, gc, style, node_label_vertical_spacing)
+        # TRANSLATE TO CANVAS
+        #
+        for node in self.graph.nodes():
+            (node.translated_position.x, node.translated_position.y) = self.translate(node.position.x, node.position.y)
+        
+        self.draw_to_pixmap(pixmap, gc, style, node_label_vertical_spacing)

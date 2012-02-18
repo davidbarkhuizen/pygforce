@@ -159,19 +159,25 @@ class GEM(object):
             return True
         
         print('\n'*80)
-        if self.b1_down == True:
-            
+        if self.b1_down == True:            
             
             trans_x = self.b1_x - self.force_directed_graph.X_OFFSET
             trans_y = self.b1_x - self.force_directed_graph.Y_OFFSET
         
             print('pointer - (%i, %i) -> (%i, %i)' % (self.b1_x, self.b1_y, trans_x, trans_y))
         
+        print(('Idx').rjust(5) + ('x').rjust(10) + ' ' + ('y').rjust(10))
         for tag in sorted(self.graph.nodes(), key = lambda x : x.idx):
-            print('%i @ (%.2f, %.2f)' % (tag.idx, tag.x, tag.y))        
+            
+            x = tag.position.x
+            y = tag.position.y
+            idx = tag.idx
+            
+            print(('%i' % idx).rjust(5) + ' ' + ('%.2f' % x).rjust(10) + ' ' + ('%.2f' % y).rjust(10))
         
         # construct pixmap
         pixmap = gtk.gdk.Pixmap(self.da.window, self.gw, self.gh, depth=-1)
+        
         # draw white background
         pixmap.draw_rectangle(self.style.white_gc, True, 0, 0, self.gw, self.gh)
         

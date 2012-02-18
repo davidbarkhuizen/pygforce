@@ -1,3 +1,5 @@
+from points import Point2D
+
 class Tag(object):
 
     last_used_idx = 0
@@ -9,10 +11,10 @@ class Tag(object):
     
     def __init__(self, x, y, label):
     
-        self.idx = Tag.pop_unused_idx()
+        self.idx = Tag.pop_unused_idx()        
         
-        self.x = x
-        self.y = y
+        self.position = Point2D(x, y)
+        self.translated_position = Point2D(x, y)
         
         self.label = label
         
