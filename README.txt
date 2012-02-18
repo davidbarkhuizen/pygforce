@@ -3,9 +3,14 @@ David Barkhuizen - david.barkhuizen@gmail.com
 PyGForce - Force Directed Graphs with Python, pyGTK & NetworkX
 ==============================================================
 
+------------
 DEPENDENCIES
-- pyGTK
-- NetworkX
-- Python
+------------
+- pyGTK @ http://www.pygtk.org/
+- NetworkX @ http://networkx.lanl.gov/
+- Python @ http://python.org/
 
-program entry point = g_force.py
+-----------
+ENTRY POINT
+-----------
+g_force.py
