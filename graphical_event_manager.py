@@ -1,5 +1,6 @@
 import random
 import gtk
+import time
 
 WIN_TITLE = 'Force-Directed Graphs'
 WINDOW_WIDTH = 900
@@ -13,12 +14,18 @@ class GEM(object):
     graphical event manager
     framework for handling simple process driven and interactive graphics
     '''    
+    
+    # time between random removal of node
+    #
+    GENERATION_INTERVAL = 5.0 # seconds
+    
     def __init__(self, graph=None):
         '''
         '''
         
         self.graph = graph
         self.force_directed_graph = ForceDirectedGraph(WINDOW_WIDTH, WINDOW_HEIGHT, graph=self.graph)   
+        self.last_generation_timestamp = None        
         
         self.b1_down = False
         self.b2_down = False
@@ -26,6 +33,9 @@ class GEM(object):
         
         self.b1_x = None
         self.b1_y = None
+        
+        self.mx = None
+        self.my = None
         
         self.started = False
         
@@ -112,6 +122,9 @@ class GEM(object):
         call self.force_directed_graph.move(d_x, d_y, d_z), passing deltas
         '''
 
+        self.mx = event.x
+        self.my = event.y
+
         if (self.b1_down == True):
             x = event.x
             y = event.y
@@ -143,7 +156,6 @@ class GEM(object):
             self.b3_down = False     
 
         return True   
-     
 
     def time_tick_handler(self):
         '''
@@ -159,12 +171,21 @@ class GEM(object):
             return True
         
         print('\n'*80)
-        if self.b1_down == True:            
-            
-            trans_x = self.b1_x - self.force_directed_graph.X_OFFSET
-            trans_y = self.b1_x - self.force_directed_graph.Y_OFFSET
         
-            print('pointer - (%i, %i) -> (%i, %i)' % (self.b1_x, self.b1_y, trans_x, trans_y))
+        now = time.clock()
+        
+        if not self.last_generation_timestamp:
+            self.last_generation_timestamp = time.clock()
+        elif now - self.last_generation_timestamp > GEM.GENERATION_INTERVAL:
+            
+            self.last_generation_timestamp = now
+        
+        if self.mx and self.my:
+        
+            reversed_x = self.mx - self.force_directed_graph.X_OFFSET
+            reversed_y = self.my - self.force_directed_graph.Y_OFFSET
+            
+            print('pointer - (%i, %i) -> (%i, %i)' % (self.mx, self.my, reversed_x, reversed_y))
         
         print(('Idx').rjust(5) + ('x').rjust(10) + ' ' + ('y').rjust(10))
         for tag in sorted(self.graph.nodes(), key = lambda x : x.idx):
