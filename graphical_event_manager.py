@@ -277,7 +277,7 @@ class GEM(object):
         
         # draw white background
         #
-        pixmap.draw_rectangle(self.style.black_gc, True, 0, 0, self.gw, self.gh)
+        pixmap.draw_rectangle(self.style.white_gc, True, 0, 0, self.gw, self.gh)
         
         # call rot.iterate on pixmap        
         #

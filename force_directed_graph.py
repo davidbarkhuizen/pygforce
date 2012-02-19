@@ -31,10 +31,10 @@ class ForceDirectedGraph(object):
 
         edge_colour = 'darkgreen'
         node_colour = 'darkgreen'
-        text_colour = 'lightgreen'
+        text_colour = 'black'
         
-        selected_node_colour = 'yellow'
-        edges_adj_to_selected_node_colour = 'yellow'                
+        selected_node_colour = 'blue'
+        edges_adj_to_selected_node_colour = 'blue'                
         
         selected_node = None
         selected_nodes = [x for x in self.graph.nodes() if x.is_selected]
