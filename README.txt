@@ -6,11 +6,11 @@ PyGForce - Force Directed Graphs with Python, pyGTK & NetworkX
 ------------
 DEPENDENCIES
 ------------
-- pyGTK @ http://www.pygtk.org/
-- NetworkX @ http://networkx.lanl.gov/
-- Python @ http://python.org/
+- pyGTK			Python Bindings for the GTK Widget Kit		http://www.pygtk.org/
+- NetworkX   	Graph Theory Routines						http://networkx.lanl.gov/
+- Python		The Evil Snake								http://python.org/
 
 -----------
 ENTRY POINT
 -----------
-g_force.py
+demo_pygforce.py

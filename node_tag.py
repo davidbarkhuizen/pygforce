@@ -25,10 +25,12 @@ class Tag(object):
         self.displacement = (0, 0)
         self.velocity = (0, 0)
 
+        self.is_selected = False
+
     def __str__(self):
         
         s = ('%i = %s' % (self.idx, self.label)) + '\n'
-        s = s + ('(x,y) = (%f,%f)' % (self.x, self.y)) + '\n'
+        s = s + ('(x,y) = (%f,%f)' % (self.position.x, self.position.y)) + '\n'
         
         (Fx, Fy) = self.net_electrostatic_force
         s = s + ('electro-static Fx, Fy = %f, %f' % (Fx, Fy)) + '\n'

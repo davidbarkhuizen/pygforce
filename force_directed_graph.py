@@ -34,12 +34,27 @@ class ForceDirectedGraph(object):
             x = int(node.translated_position.x)
             y = int(node.translated_position.y)
             
+            #for x in dir(gc): print(x)
+            
+            orig_fg_color = gc.foreground
+
+            COLOUR_ORANGE = "#FF8000"
+            COLOURS = ['red', 'green', 'blue', 'purple', 'red_float', 'green_float', 'blue_float']
+
+            is_selected = node.is_selected 
+            if is_selected:
+                gc.set_foreground(pixmap.get_colormap().alloc_color("red")) 
+
             # NODE = BOX
             pixmap.draw_rectangle(gc, True, x - box_side, y - box_side, 2*box_side, 2*box_side)
             
             # LABEL / TEXT
             font = style.get_font()
             pixmap.draw_text(font, gc, x, y - node_label_vert_spacing, node.label)
+            
+            # revert to normal node color
+            if is_selected:
+                gc.set_foreground(orig_fg_color)
             
         # EDGES
         #
@@ -115,9 +130,8 @@ class ForceDirectedGraph(object):
             if r == 0.0:
                 continue
             
-            # CONSTANTS
-            #
-           
+            # PHYSICS CONSTANTS
+            #           
             k = SPRING_CONSTANT
             l = EQUILIBRIUM_DISPLACEMENT
            
@@ -146,6 +160,7 @@ class ForceDirectedGraph(object):
 
     def net_force_at_node(self, tag):
         '''
+        net Force = net Electrostatic Force + net Spring Force
         '''        
         eX, eY = tag.net_electrostatic_force
         sX, sY = tag.net_spring_force
@@ -157,6 +172,7 @@ class ForceDirectedGraph(object):
 
     def displacement_at_node(self, tag):
         '''
+        ERROR - DISPLACEMENT IS NOT USING VELOCITY
         '''        
         eX, eY = tag.net_electrostatic_force
         sX, sY = tag.net_spring_force
@@ -169,14 +185,23 @@ class ForceDirectedGraph(object):
         return displacement    
 
     def velocity_at_tag(self, tag):
+        '''
+        ERROR !! VELOCITY IS NOT BEING USED TO DETERMINED DISPLACEMENT, ONLY NET FORCE
+        
+        V_new = (V_old * Friction) + (current NET FORCE * TIME_STEP)
+        '''
         
         (xf, yf) = self.net_force_at_node(tag)
         
+        # RECORD PREVIOUS VELOCITY
+        #
         (xo, yo) = tag.velocity
         
         friction = FRICTION 
         time_step = TIME_STEP
         
+        # NEW V = (OLD V * FRICTION) + (CURRENT NET FORCE * TIME_STEP)
+        #
         xn = (xo * friction) + xf * time_step 
         yn = (yo * friction) + yf * time_step
 
@@ -191,19 +216,32 @@ class ForceDirectedGraph(object):
             effect displacements
         '''
 
+        # ------------------------------------
+        
+        
+        # ------------------------------------
+        # FOR EACH NODE 
+
+        # CALCULATE NET FORCE
+        #
         for tag in self.graph.nodes():
             tag.net_electrostatic_force = self.net_electrostatic_force_at_node(tag)
 
         for tag in self.graph.nodes():
             tag.net_spring_force = self.net_spring_force_at_node(tag)        
         
+        # CALC VELOCITY
+        #
         for tag in self.graph.nodes():
             tag.velocity = self.velocity_at_tag(tag)
         
+        # CALC DISPLACEMENT
+        #
         for tag in self.graph.nodes():
             tag.displacement = self.displacement_at_node(tag)
         
         # ADJUST POSITION
+        #
         for tag in self.graph.nodes():
             (dx, dy) = tag.displacement
             tag.position.x = tag.position.x + dx
@@ -214,4 +252,6 @@ class ForceDirectedGraph(object):
         for node in self.graph.nodes():
             (node.translated_position.x, node.translated_position.y) = self.translate(node.position.x, node.position.y, W_0, H_0, W_1, H_1)
         
+        # CALL RENDERING METHOD
+        #
         self.draw_to_pixmap(pixmap, gc, style, node_label_vertical_spacing)

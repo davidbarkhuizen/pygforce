@@ -1,6 +1,7 @@
 from random import randint
 import gtk
 import time
+import math
 
 from constants import *
 
@@ -88,6 +89,8 @@ class GEM(object):
             self.b1_y = event.y
             self.b1_down = True
             
+            self.handle_node_select_attempt(event.x, event.y)
+            
             # translated x,y for button press canvaS x,y
             # check which nodes are within selection volume
             # find the closest of the nodes
@@ -151,6 +154,33 @@ class GEM(object):
 
         return True   
 
+    def handle_node_select_attempt(self, x1, y1):
+        
+        x0, y0 = self.force_directed_graph.reverse(x1, y1, W_0, H_0, W_1, H_1)
+        
+        # distances
+        r2s = {} # r2 : Node        
+        for node in self.graph.nodes():      
+            # r2 = (x - mx0)^2 + (y - my0)^2      
+            r2s[node] = math.pow(node.position.x - x0, 2) + math.pow(node.position.y - y0, 2)
+           
+        for node in r2s.keys():
+            r2 = r2s[node]
+            if r2 > (MINIMUM_NODE_SELECTION_RADIUS * MINIMUM_NODE_SELECTION_RADIUS):
+                r2s.pop(node)
+        
+        if len(r2s) > 0:
+            sorted_nodes = sorted(r2s.keys(), key = lambda x : r2s[x])
+            closest_node = sorted_nodes[0]
+        
+        for node in self.graph.nodes():
+            # RESET ALL OTHER NODES
+            if node != closest_node:
+                node.is_selected = False
+            # TOGGLE SELECTION ON TRAGET NODE
+            elif node == closest_node:
+                node.is_selected = not node.is_selected 
+                
     def time_tick_handler(self):
         '''
         only run if (self.started == True)
@@ -162,16 +192,35 @@ class GEM(object):
         show change
         '''        
         if (self.started != True):
-            return True
-        
-        print('\n'*80)
+            return True        
         
         now = time.clock()
         
+        # ------------------------------------------------------------------------
+        
+        # CALC POINTER POSITION
+        #
+        
+        (mx0, my0) = (0,0)
+        if self.mx and self.my:
+            mx0, my0 = self.force_directed_graph.reverse(self.mx, self.my, W_0, H_0, W_1, H_1)
+            print('0 = (%i, %i), 1 = (%i, %i)' % (mx0, my0, self.mx, self.my))
+        
+        # calc square of dist from each node
+        
+
+        
+        # ------------------------------------------------------------------------        
+        
+        # PERIOIDIC INTERFERENCE WITH SIMULATION - ADD/REMOVE NODE @ RANDOM
+        #
         # HANDLE GENERATION ZERO
+        #
         if not self.last_generation_timestamp:
-            self.last_generation_timestamp = time.clock()
+            self.last_generation_timestamp = time.clock()     
+               
         # HANDLE SUBSEQUENT GENERATIONS
+        #
         elif now - self.last_generation_timestamp > GENERATION_INTERVAL:
             
             node_count = len(self.graph.nodes())
@@ -181,7 +230,7 @@ class GEM(object):
             
             # LOWER BOUND ON NODE COUNT
             if node_count <= min_node_count:
-                new_node = add_node_to_graph_at_random(self.graph, W_0, H_0)
+                new_node = add_node_to_graph_at_random(self.graph)
             # UPPER BOUND ON NODE COUNT
             elif node_count >= max_node_count:
                 remove_node_from_graph_at_random(self.graph)
@@ -194,12 +243,16 @@ class GEM(object):
                     new_node = add_node_to_graph_at_random(self.graph)
                 self.last_generation_timestamp = now
         
-        if self.mx and self.my:
-            reversed_x, reversed_y = self.force_directed_graph.reverse(self.mx, self.my, W_0, H_0, W_1, H_1)
-            print('0 = (%i, %i), 1 = (%i, %i)' % (reversed_x, reversed_y, self.mx, self.my))
+        # --------------------------------------------------
         
+        print('\n'*80)
+        
+        # REPORT POINTER POSITION        
+        #
         print('(W0, H0) = %i, %i | (W1, H1) = %i, %i' % (W_0, H_0, W_1, H_1))
         
+        # REPORT ON NODES
+        #        
         print(('Idx').rjust(5) + ('x').rjust(10) + ' ' + ('y').rjust(10))
         for tag in sorted(self.graph.nodes(), key = lambda x : x.idx):
             
@@ -209,21 +262,28 @@ class GEM(object):
             
             tx, ty = self.force_directed_graph.translate(x, y, W_0, H_0, W_1, H_1)
             
-            print(('%i' % idx).rjust(5) + ' ' + ('%.2f' % x).rjust(10) + ' ' + ('%.2f' % y).rjust(10)+ ' ' + ('%.2f' % tx).rjust(10) + ' ' + ('%.2f' % ty).rjust(10))
+            selected_token = '*' if tag.is_selected else ' '
+            
+            print(selected_token + ' ' + ('%i' % idx).rjust(5) + ' ' + ('%.2f' % x).rjust(10) + ' ' + ('%.2f' % y).rjust(10)+ ' ' + ('%.2f' % tx).rjust(10) + ' ' + ('%.2f' % ty).rjust(10))
         
         # construct pixmap
+        #
         pixmap = gtk.gdk.Pixmap(self.da.window, self.gw, self.gh, depth=-1)
         
         # draw white background
+        #
         pixmap.draw_rectangle(self.style.white_gc, True, 0, 0, self.gw, self.gh)
         
         # call rot.iterate on pixmap        
+        #
         self.force_directed_graph.iterate(pixmap, self.gc, self.style, NODE_LABEL_VERT_SPACING)        
         
         # draw pixmap to window
+        #
         self.area.window.draw_drawable(self.gc, pixmap, 0, 0, 0, 0, -1, -1)  
                 
         # show changes
+        #
         self.area.show()
       
         return True # return True => repeat

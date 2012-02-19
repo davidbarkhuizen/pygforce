@@ -1,22 +1,32 @@
-WIN_TITLE = 'Force-Directed Graphs'
+WIN_TITLE = 'PyGForce - Force-Directed Graphs in Python using NetworkX and pyGTK'
 
-W_0 = 1000
-H_0 = int(float(W_0) / 1.6)
+# DIMENSIONS OF PHASE SPACE
+#
+W_0 = 600
+H_0 = int(float(W_0) / 1.0)
 
-W_1 = 900
-H_1 = int(float(W_1) / 1.6)
-
-NODE_LABEL_VERT_SPACING = 5
-
-TIMER_TICK_PERIOD = 50
-GENERATION_INTERVAL = 15.0 # seconds
-
+# PHYSICS CONSTANTS
+#
 SPRING_CONSTANT = 0.1
 EQUILIBRIUM_DISPLACEMENT = 30
 TIME_STEP = 0.8
 FRICTION = 0.95
 
+# DIMENSIONS OF CANVAS
+#
+W_1 = 700
+H_1 = int(float(W_1) / 1.0)
 
-    
-    
-    
+# VERT GAP BETWEEN NODE & LABEL
+#
+NODE_LABEL_VERT_SPACING = 5
+
+# PERIOD OF GTK WINDOW TIMER TICK EVENT [that our handler is hooked into]
+#
+TIMER_TICK_PERIOD = 50 # milliseconds
+
+# INTERVAL BETWEEN RANDOM ADD/REMOVE NODE
+#
+GENERATION_INTERVAL = 15.0 # seconds
+
+MINIMUM_NODE_SELECTION_RADIUS = 10.0
