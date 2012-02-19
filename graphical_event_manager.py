@@ -23,7 +23,7 @@ class GEM(object):
         self.force_directed_graph = ForceDirectedGraph(graph=self.graph, graphical_event_manager=self)   
         self.last_generation_timestamp = None        
         
-        self.last_b1_drag_position = None
+        self.display_node_labels = False
         
         self.b1_down = False
         self.b2_down = False
@@ -54,17 +54,29 @@ class GEM(object):
         self.da.set_size_request(self.gw, self.gh)
         self.win.set_resizable(False)
         
+        # REGISTER HANDLERS FOR GTK EVENTS
+        
+        # WINDOW / PAINT EVENTS
+        # 
         self.da.connect("expose-event", self.area_expose_cb)
+        
+        # MOUSE EVENTS
+        #
         self.da.connect("button_press_event", self.button_press_event)
         self.da.connect("button_release_event", self.button_released_event)  
         self.da.connect("motion_notify_event", self.motion_notify_event)
         #self.da.connect("scroll_event", self.scroll_event)
-            
+        
+        # KEYBOARD EVENTS
+        #
+        self.win.connect("key-press-event", self.on_key_press_event)
+        
         self.da.set_events(
-            gtk.gdk.EXPOSURE_MASK | 
-            gtk.gdk.BUTTON_PRESS_MASK | 
-            gtk.gdk.BUTTON_RELEASE_MASK | 
-            gtk.gdk.POINTER_MOTION_MASK #| 
+            gtk.gdk.EXPOSURE_MASK 
+            | gtk.gdk.BUTTON_PRESS_MASK 
+            | gtk.gdk.BUTTON_RELEASE_MASK 
+            | gtk.gdk.POINTER_MOTION_MASK
+            | gtk.gdk.KEY_PRESS_MASK
          #   gtk.gdk.SCROLL_MASK            
             )
               
@@ -161,6 +173,9 @@ class GEM(object):
             self.b3_down = False     
 
         return True   
+
+    def on_key_press_event(self, widget, event):        
+        self.display_node_labels = not self.display_node_labels
 
     def handle_node_select_attempt(self, x1, y1):
         

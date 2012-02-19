@@ -74,16 +74,18 @@ class ForceDirectedGraph(object):
                 gc.set_foreground(pixmap.get_colormap().alloc_color(node_colour))
             
             pixmap.draw_rectangle(gc, True, x - box_side, y - box_side, 2*box_side, 2*box_side)  
-            
+
             # LABEL / TEXT
             
-            if is_selected:
-                gc.set_foreground(pixmap.get_colormap().alloc_color(selected_node_colour))    
-            else:        
-                gc.set_foreground(pixmap.get_colormap().alloc_color(text_colour))            
-            
-            font = style.get_font()
-            pixmap.draw_text(font, gc, x, y - node_label_vert_spacing, node.label)
+            if (self.gem.display_node_labels):            
+
+                if is_selected:
+                    gc.set_foreground(pixmap.get_colormap().alloc_color(selected_node_colour))    
+                else:        
+                    gc.set_foreground(pixmap.get_colormap().alloc_color(text_colour))            
+                
+                font = style.get_font()
+                pixmap.draw_text(font, gc, x, y - node_label_vert_spacing, node.label)
 
     def net_electrostatic_force_at_node(self, tag_A):
         
