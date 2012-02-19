@@ -6,8 +6,9 @@ from constants import *
 
 class ForceDirectedGraph(object):
         
-    def __init__(self, graph=None, ):
+    def __init__(self, graph=None, graphical_event_manager=None):
         self.graph = graph
+        self.gem = graphical_event_manager
 
     def translate(self, x0, y0, w0, h0, w1, h1):
         
@@ -243,9 +244,13 @@ class ForceDirectedGraph(object):
         # ADJUST POSITION
         #
         for tag in self.graph.nodes():
-            (dx, dy) = tag.displacement
-            tag.position.x = tag.position.x + dx
-            tag.position.y = tag.position.y + dy            
+            
+            if tag.is_selected and self.gem.b1_down:
+                pass
+            else:
+                (dx, dy) = tag.displacement
+                tag.position.x = tag.position.x + dx
+                tag.position.y = tag.position.y + dy            
         
         # TRANSLATE TO CANVAS
         #

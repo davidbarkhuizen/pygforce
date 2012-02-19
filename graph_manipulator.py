@@ -48,7 +48,7 @@ def add_edges_for_vertex_at_random(graph, node, max_edges_to_create_per_node_per
                     graph.add_edge(node, nodes[z])
                     new_edge_added = True
 
-def generate_graph(p=11, max_edges_to_create_per_node_per_pass=2):
+def generate_graph(p, max_edges_to_create_per_node_per_pass):
     '''
     generate a semi-random graph of size p
     

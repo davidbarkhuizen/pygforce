@@ -12,7 +12,7 @@ def main():
 	generate graph, set time, and launch gtk via gtk.main()
 	'''
 	# construct test graph
-	g = generate_graph()
+	g = generate_graph(DEMO_GRAPH_SIZE, DEMO_GRAPH_BRANCHING_CONST)
 	
 	# launch graphical event manager
 	gem = GEM(graph=g)

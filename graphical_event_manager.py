@@ -19,8 +19,11 @@ class GEM(object):
         '''
         
         self.graph = graph
-        self.force_directed_graph = ForceDirectedGraph(graph=self.graph)   
+        
+        self.force_directed_graph = ForceDirectedGraph(graph=self.graph, graphical_event_manager=self)   
         self.last_generation_timestamp = None        
+        
+        self.last_b1_drag_position = None
         
         self.b1_down = False
         self.b2_down = False
@@ -85,9 +88,16 @@ class GEM(object):
     def button_press_event(self, widget, event):                    
 
         if (event.button == 1):                        
+            
+            # NOTE POSITION OF ORIGINAL CLICK
             self.b1_x = event.x
             self.b1_y = event.y
+            
             self.b1_down = True
+            
+            # should do node selection here
+            
+            self.last_b1_drag_position = (event.x, event.y)
             
             self.handle_node_select_attempt(event.x, event.y)
             
@@ -119,19 +129,18 @@ class GEM(object):
         call self.force_directed_graph.move(d_x, d_y, d_z), passing deltas
         '''
 
-        self.mx = event.x
-        self.my = event.y
-
         if (self.b1_down == True):
-            x = event.x
-            y = event.y
             
-            d_x = x - self.b1_x
-            d_y = y - self.b1_y
-            
-            self.b1_x = x
-            self.b1_y = y
+            (x_1_now, y_1_now) = (event.x, event.y)
+            (x_0_now, y_0_now) = self.force_directed_graph.reverse(x_1_now, y_1_now, W_0, H_0, W_1, H_1)
+           
+            selected_node = [x for x in self.graph.nodes() if x.is_selected][0]
 
+            selected_node.position.x = x_0_now #selected_node.position.x + d_x
+            selected_node.position.y = y_0_now #selected_node.position.y + d_y 
+            
+            # self.last_b1_drag_position = (x_1_now, y_1_now)
+            
             # self.force_directed_graph.move(d_x, d_y, d_z)
         
         elif (self.b3_down == True):
@@ -201,14 +210,10 @@ class GEM(object):
         # CALC POINTER POSITION
         #
         
-        (mx0, my0) = (0,0)
-        if self.mx and self.my:
-            mx0, my0 = self.force_directed_graph.reverse(self.mx, self.my, W_0, H_0, W_1, H_1)
-            print('0 = (%i, %i), 1 = (%i, %i)' % (mx0, my0, self.mx, self.my))
-        
-        # calc square of dist from each node
-        
-
+#        (mx0, my0) = (0,0)
+#        if self.mx and self.my:
+#            mx0, my0 = self.force_directed_graph.reverse(self.mx, self.my, W_0, H_0, W_1, H_1)
+#            print('Pointer (x0,y0) = (%i, %i), (x1,y1) = (%i, %i)' % (mx0, my0, self.mx, self.my))
         
         # ------------------------------------------------------------------------        
         
@@ -225,8 +230,8 @@ class GEM(object):
             
             node_count = len(self.graph.nodes())
             
-            min_node_count = 5
-            max_node_count = 20
+            min_node_count = DEMO_GRAPH_SIZE / 2
+            max_node_count = DEMO_GRAPH_SIZE * 2
             
             # LOWER BOUND ON NODE COUNT
             if node_count <= min_node_count:
@@ -245,15 +250,15 @@ class GEM(object):
         
         # --------------------------------------------------
         
-        print('\n'*80)
+        # print('\n'*80)
         
         # REPORT POINTER POSITION        
         #
-        print('(W0, H0) = %i, %i | (W1, H1) = %i, %i' % (W_0, H_0, W_1, H_1))
+        #print('(W0, H0) = %i, %i | (W1, H1) = %i, %i' % (W_0, H_0, W_1, H_1))
         
         # REPORT ON NODES
         #        
-        print(('Idx').rjust(5) + ('x').rjust(10) + ' ' + ('y').rjust(10))
+        #print(' ' + ('Idx').rjust(5) + ('x0').rjust(10) + ' ' + ('y0').rjust(10) + ('x1').rjust(10) + ' ' + ('y1').rjust(10))
         for tag in sorted(self.graph.nodes(), key = lambda x : x.idx):
             
             x = tag.position.x
@@ -264,7 +269,7 @@ class GEM(object):
             
             selected_token = '*' if tag.is_selected else ' '
             
-            print(selected_token + ' ' + ('%i' % idx).rjust(5) + ' ' + ('%.2f' % x).rjust(10) + ' ' + ('%.2f' % y).rjust(10)+ ' ' + ('%.2f' % tx).rjust(10) + ' ' + ('%.2f' % ty).rjust(10))
+            #print(selected_token + ' ' + ('%i' % idx).rjust(5) + ' ' + ('%.2f' % x).rjust(10) + ' ' + ('%.2f' % y).rjust(10)+ ' ' + ('%.2f' % tx).rjust(10) + ' ' + ('%.2f' % ty).rjust(10))
         
         # construct pixmap
         #
