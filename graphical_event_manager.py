@@ -133,19 +133,18 @@ class GEM(object):
             
             (x_1_now, y_1_now) = (event.x, event.y)
             (x_0_now, y_0_now) = self.force_directed_graph.reverse(x_1_now, y_1_now, W_0, H_0, W_1, H_1)
-           
-            selected_node = [x for x in self.graph.nodes() if x.is_selected][0]
+            
+            selected_nodes = [x for x in self.graph.nodes() if x.is_selected]
+            
+            if len(selected_nodes) > 0:            
 
-            selected_node.position.x = x_0_now #selected_node.position.x + d_x
-            selected_node.position.y = y_0_now #selected_node.position.y + d_y 
-            
-            # self.last_b1_drag_position = (x_1_now, y_1_now)
-            
-            # self.force_directed_graph.move(d_x, d_y, d_z)
-        
+                selected_node = selected_nodes[0]
+    
+                selected_node.position.x = x_0_now
+                selected_node.position.y = y_0_now 
+      
         elif (self.b3_down == True):
             pass
-            # self.force_directed_graph.move(d_x, d_y, d_z)
 
         return True
         
@@ -178,6 +177,7 @@ class GEM(object):
             if r2 > (MINIMUM_NODE_SELECTION_RADIUS * MINIMUM_NODE_SELECTION_RADIUS):
                 r2s.pop(node)
         
+        closest_node = None
         if len(r2s) > 0:
             sorted_nodes = sorted(r2s.keys(), key = lambda x : r2s[x])
             closest_node = sorted_nodes[0]
@@ -277,7 +277,7 @@ class GEM(object):
         
         # draw white background
         #
-        pixmap.draw_rectangle(self.style.white_gc, True, 0, 0, self.gw, self.gh)
+        pixmap.draw_rectangle(self.style.black_gc, True, 0, 0, self.gw, self.gh)
         
         # call rot.iterate on pixmap        
         #

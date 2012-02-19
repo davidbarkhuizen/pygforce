@@ -29,38 +29,61 @@ class ForceDirectedGraph(object):
         '''
         # pixmap.draw_line(self.gc, x, y, self.w/2, self.h/2)  
 
-        box_side = 2
+        edge_colour = 'darkgreen'
+        node_colour = 'darkgreen'
+        text_colour = 'lightgreen'
+        
+        selected_node_colour = 'yellow'
+        edges_adj_to_selected_node_colour = 'yellow'                
+        
+        selected_node = None
+        selected_nodes = [x for x in self.graph.nodes() if x.is_selected]
+        if len(selected_nodes) > 0:
+            selected_node = selected_nodes[0]
+        
+        # EDGES
+        #
+        for (i, j) in self.graph.edges():
+            
+            if selected_node in [i, j]:
+                gc.set_foreground(pixmap.get_colormap().alloc_color(edges_adj_to_selected_node_colour))
+            else:
+                gc.set_foreground(pixmap.get_colormap().alloc_color(edge_colour))
+                
+            
+            pixmap.draw_line(gc, int(i.translated_position.x), int(i.translated_position.y), int(j.translated_position.x), int(j.translated_position.y))
+
+        box_side = 4
         for node in self.graph.nodes():
             
             x = int(node.translated_position.x)
             y = int(node.translated_position.y)
             
-            #for x in dir(gc): print(x)
-            
-            orig_fg_color = gc.foreground
-
-            COLOUR_ORANGE = "#FF8000"
             COLOURS = ['red', 'green', 'blue', 'purple', 'red_float', 'green_float', 'blue_float']
 
-            is_selected = node.is_selected 
-            if is_selected:
-                gc.set_foreground(pixmap.get_colormap().alloc_color("red")) 
+            gc.set_foreground(pixmap.get_colormap().alloc_color("brown")) 
 
-            # NODE = BOX
-            pixmap.draw_rectangle(gc, True, x - box_side, y - box_side, 2*box_side, 2*box_side)
+            is_selected = node.is_selected 
+            
+            # NODES 
+            #
+            
+            if is_selected:
+                gc.set_foreground(pixmap.get_colormap().alloc_color(selected_node_colour))    
+            else:        
+                gc.set_foreground(pixmap.get_colormap().alloc_color(node_colour))
+            
+            pixmap.draw_rectangle(gc, True, x - box_side, y - box_side, 2*box_side, 2*box_side)  
             
             # LABEL / TEXT
+            
+            if is_selected:
+                gc.set_foreground(pixmap.get_colormap().alloc_color(selected_node_colour))    
+            else:        
+                gc.set_foreground(pixmap.get_colormap().alloc_color(text_colour))            
+            
             font = style.get_font()
             pixmap.draw_text(font, gc, x, y - node_label_vert_spacing, node.label)
-            
-            # revert to normal node color
-            if is_selected:
-                gc.set_foreground(orig_fg_color)
-            
-        # EDGES
-        #
-        for (i, j) in self.graph.edges():
-            pixmap.draw_line(gc, int(i.translated_position.x), int(i.translated_position.y), int(j.translated_position.x), int(j.translated_position.y))
 
     def net_electrostatic_force_at_node(self, tag_A):
         
@@ -216,9 +239,6 @@ class ForceDirectedGraph(object):
             calc displacement [impulse]
             effect displacements
         '''
-
-        # ------------------------------------
-        
         
         # ------------------------------------
         # FOR EACH NODE 
