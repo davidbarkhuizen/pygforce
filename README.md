@@ -3,7 +3,7 @@
 Force-directed graph visualisation in Python using
 [NetworkX](https://networkx.org/) and GTK 3 (PyGObject).
 
-David Barkhuizen — david.barkhuizen@gmail.com
+David Barkhuizen
 
 ## What it does
 
