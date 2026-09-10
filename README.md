@@ -1,7 +1,7 @@
 # PyGForce
 
-Force-directed graph visualisation in Python using [NetworkX](https://networkx.org/)
-and PyGTK.
+Force-directed graph visualisation in Python using
+[NetworkX](https://networkx.org/) and GTK 3 (PyGObject).
 
 David Barkhuizen — david.barkhuizen@gmail.com
 
@@ -11,7 +11,7 @@ David Barkhuizen — david.barkhuizen@gmail.com
 (`DEMO_GRAPH_SIZE` nodes, generated with NetworkX) and runs a force-directed
 layout simulation — nodes repel, edges act as springs (`SPRING_CONSTANT`,
 `EQUILIBRIUM_DISPLACEMENT`, `FRICTION`, `TIME_STEP` in `constants.py`), stepped
-on a GTK timer tick.
+on a GLib timer tick and drawn with cairo.
 
 While it runs:
 
@@ -20,30 +20,29 @@ While it runs:
 - **Drag** a node with the mouse to reposition it.
 - **Tab** (in fact any key) toggles the node labels on and off.
 - Every few seconds (`GENERATION_INTERVAL`) the demo adds or removes a random
-  node and its edges, keeping the node count between `DEMO_GRAPH_SIZE / 2` and
+  node and its edges, keeping the node count between `DEMO_GRAPH_SIZE // 2` and
   `DEMO_GRAPH_SIZE * 2`.
 
 ## Requirements
 
-This is a **Python 2** program built on **PyGTK (GTK 2)**. PyGTK was never ported
-to Python 3 and is no longer maintained, so there is no Python 3 path.
+- Python 3
+- GTK 3 with GObject Introspection (PyGObject) and pycairo
+- [NetworkX](https://networkx.org/) — 2.x or 3.x
 
-- Python 2.7
-- PyGTK 2 — provides the `gtk` and `gobject` modules — plus the native GTK+ 2
-  runtime libraries it binds to
-- [NetworkX](https://networkx.org/)
-
-On a Debian/Ubuntu system with Python 2 still available:
+On Debian/Ubuntu the runtime pieces are easiest from apt:
 
 ```
-sudo apt install python-gtk2 python-gobject-2
-pip2 install networkx
+sudo apt install python3-gi gir1.2-gtk-3.0 python3-gi-cairo
+pip install -r requirements.txt   # networkx
 ```
+
+`pip install pygobject pycairo` also works if the GTK 3 / cairo development
+headers are present.
 
 ## Running
 
 ```
-python2 demo_pygforce.py
+python3 demo_pygforce.py
 ```
 
 ## Layout
@@ -51,8 +50,8 @@ python2 demo_pygforce.py
 | File | Role |
 | --- | --- |
 | `demo_pygforce.py` | Entry point — builds the demo graph and starts the GTK loop |
-| `force_directed_graph.py` | Force-directed layout maths and coordinate transforms |
-| `graphical_event_manager.py` | GTK window, drawing, and mouse/keyboard/timer handlers |
+| `force_directed_graph.py` | Layout maths, coordinate transforms, `step()` (physics) and `render(cr)` (cairo drawing) |
+| `graphical_event_manager.py` | GTK 3 window and drawing area, mouse/keyboard handlers, timer tick |
 | `graph_manipulator.py` | Random graph generation and add/remove-node helpers |
 | `node_tag.py` | Per-node data (index, position, label, selection state) |
 | `points.py` | 2D point helper |

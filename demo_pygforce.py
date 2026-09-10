@@ -1,30 +1,24 @@
-import gobject
-import gtk
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, GLib
 
 from graph_manipulator import generate_graph
-from force_directed_graph import ForceDirectedGraph
-from node_tag import Tag
 from graphical_event_manager import GEM
-from constants import *
+from constants import DEMO_GRAPH_SIZE, DEMO_GRAPH_BRANCHING_CONST, TIMER_TICK_PERIOD
+
 
 def main():
-	'''
-	generate graph, set time, and launch gtk via gtk.main()
-	'''
-	# construct test graph
-	g = generate_graph(DEMO_GRAPH_SIZE, DEMO_GRAPH_BRANCHING_CONST)
-	
-	# launch graphical event manager
-	gem = GEM(graph=g)
-	
-	# tick event period
-	tick_event_period = TIMER_TICK_PERIOD
-	
-	# attach tick event handler
-	gem.timer = gobject.timeout_add(tick_event_period, gem.time_tick_handler)
-	
-	# launch GTK
-	gtk.main()
+    '''
+    generate a graph, wire up the tick handler, and run the GTK main loop
+    '''
+    g = generate_graph(DEMO_GRAPH_SIZE, DEMO_GRAPH_BRANCHING_CONST)
+
+    gem = GEM(graph=g)
+
+    gem.timer = GLib.timeout_add(TIMER_TICK_PERIOD, gem.time_tick_handler)
+
+    Gtk.main()
+
 
 if __name__ == '__main__':
-	main()
+    main()

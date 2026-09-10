@@ -1,4 +1,4 @@
-WIN_TITLE = 'PyGForce - Force-Directed Graphs in Python using NetworkX and pyGTK'
+WIN_TITLE = 'PyGForce - Force-Directed Graphs in Python using NetworkX and GTK 3'
 
 # DIMENSIONS OF PHASE SPACE
 W_0 = 600
