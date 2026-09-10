@@ -268,28 +268,7 @@ class GEM(object):
             self.last_generation_timestamp = now
         
         # --------------------------------------------------
-        
-        # print('\n'*80)
-        
-        # REPORT POINTER POSITION        
-        #
-        #print('(W0, H0) = %i, %i | (W1, H1) = %i, %i' % (W_0, H_0, W_1, H_1))
-        
-        # REPORT ON NODES
-        #        
-        #print(' ' + ('Idx').rjust(5) + ('x0').rjust(10) + ' ' + ('y0').rjust(10) + ('x1').rjust(10) + ' ' + ('y1').rjust(10))
-        for tag in sorted(self.graph.nodes(), key = lambda x : x.idx):
-            
-            x = tag.position.x
-            y = tag.position.y
-            idx = tag.idx
-            
-            tx, ty = self.force_directed_graph.translate(x, y, W_0, H_0, W_1, H_1)
-            
-            selected_token = '*' if tag.is_selected else ' '
-            
-            #print(selected_token + ' ' + ('%i' % idx).rjust(5) + ' ' + ('%.2f' % x).rjust(10) + ' ' + ('%.2f' % y).rjust(10)+ ' ' + ('%.2f' % tx).rjust(10) + ' ' + ('%.2f' % ty).rjust(10))
-        
+
         # construct pixmap
         #
         pixmap = gtk.gdk.Pixmap(self.da.window, self.gw, self.gh, depth=-1)
