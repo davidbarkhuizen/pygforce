@@ -1,7 +1,10 @@
 from random import randint
-import gtk
 import time
 import math
+
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk, Gdk
 
 from constants import *
 
@@ -29,67 +32,51 @@ class GEM(object):
         self.b2_down = False
         self.b3_down = False
 
-        self.started = False
-
-        self.win = gtk.Window(gtk.WINDOW_TOPLEVEL)
-        self.win.set_title(WIN_TITLE)
         self.gw = W_1
-        self.gh = H_1 #int(float(self.gw) / 1.618)
-        self.win.resize(self.gw, self.gh)
-        self.win.set_position(gtk.WIN_POS_CENTER)
-        self.win.connect('destroy', gtk.main_quit)
-        #self.win.realize()
+        self.gh = H_1
 
-        self.da = gtk.DrawingArea()
-
-        self.win.add(self.da)
-        self.da.set_size_request(self.gw, self.gh)
+        self.win = Gtk.Window()
+        self.win.set_title(WIN_TITLE)
+        self.win.set_position(Gtk.WindowPosition.CENTER)
         self.win.set_resizable(False)
-        
-        # REGISTER HANDLERS FOR GTK EVENTS
-        
-        # WINDOW / PAINT EVENTS
-        # 
-        self.da.connect("expose-event", self.area_expose_cb)
-        
-        # MOUSE EVENTS
-        #
-        self.da.connect("button_press_event", self.button_press_event)
-        self.da.connect("button_release_event", self.button_released_event)  
-        self.da.connect("motion_notify_event", self.motion_notify_event)
-        #self.da.connect("scroll_event", self.scroll_event)
-        
-        # KEYBOARD EVENTS
-        #
-        self.win.connect("key-press-event", self.on_key_press_event)
-        
-        self.da.set_events(
-            gtk.gdk.EXPOSURE_MASK 
-            | gtk.gdk.BUTTON_PRESS_MASK 
-            | gtk.gdk.BUTTON_RELEASE_MASK 
-            | gtk.gdk.POINTER_MOTION_MASK
-            | gtk.gdk.KEY_PRESS_MASK
-         #   gtk.gdk.SCROLL_MASK            
-            )
-              
-        self.da.show()
-        self.win.show_all()
-    
-    def area_expose_cb(self, area, event):
-        '''
-        '''
-        self.area = area
-        
-        self.style = self.da.get_style()
-        self.gc = self.style.fg_gc[gtk.STATE_NORMAL]
-        
-        self.w, self.h = area.window.get_size()
-        
-        self.started = True
+        self.win.connect('destroy', Gtk.main_quit)
 
-        return True                
-        
-    def button_press_event(self, widget, event):                    
+        self.da = Gtk.DrawingArea()
+        self.da.set_size_request(self.gw, self.gh)
+        self.win.add(self.da)
+
+        # REGISTER HANDLERS FOR GTK EVENTS
+
+        # PAINT
+        self.da.connect('draw', self.on_draw)
+
+        # MOUSE
+        self.da.connect('button-press-event', self.button_press_event)
+        self.da.connect('button-release-event', self.button_released_event)
+        self.da.connect('motion-notify-event', self.motion_notify_event)
+
+        # KEYBOARD
+        self.win.connect('key-press-event', self.on_key_press_event)
+
+        self.da.add_events(
+            Gdk.EventMask.BUTTON_PRESS_MASK
+            | Gdk.EventMask.BUTTON_RELEASE_MASK
+            | Gdk.EventMask.POINTER_MOTION_MASK
+            | Gdk.EventMask.KEY_PRESS_MASK
+        )
+
+        self.win.show_all()
+
+    def on_draw(self, widget, cr):
+        # white background
+        cr.set_source_rgb(1.0, 1.0, 1.0)
+        cr.paint()
+
+        self.force_directed_graph.render(cr, NODE_LABEL_VERT_SPACING)
+
+        return False
+
+    def button_press_event(self, widget, event):
 
         if (event.button == 1):
 
@@ -192,75 +179,52 @@ class GEM(object):
                 
     def time_tick_handler(self):
         '''
-        only run if (self.started == True)
-        
-        construct gdk pixmap
-        draw a white background
-        call rot.iterate on pixmap
-        draw pixmap to window area
-        show change
-        '''        
-        if (self.started != True):
-            return True        
-        
+        periodic simulation tick, driven by GLib.timeout_add:
+        maybe add/remove a node, advance the physics, request a repaint.
+        '''
+
         now = time.time()
 
         # ------------------------------------------------------------------------
 
-        # PERIOIDIC INTERFERENCE WITH SIMULATION - ADD/REMOVE NODE @ RANDOM
+        # PERIODIC INTERFERENCE WITH SIMULATION - ADD/REMOVE NODE @ RANDOM
         #
         # HANDLE GENERATION ZERO
         #
         if not self.last_generation_timestamp:
             self.last_generation_timestamp = now
-               
+
         # HANDLE SUBSEQUENT GENERATIONS
         #
         elif now - self.last_generation_timestamp > GENERATION_INTERVAL:
-            
+
             node_count = len(self.graph.nodes())
-            
+
             min_node_count = DEMO_GRAPH_SIZE // 2
             max_node_count = DEMO_GRAPH_SIZE * 2
-            
+
             # LOWER BOUND ON NODE COUNT
             if node_count <= min_node_count:
-                new_node = add_node_to_graph_at_random(self.graph)
+                add_node_to_graph_at_random(self.graph)
             # UPPER BOUND ON NODE COUNT
             elif node_count >= max_node_count:
                 remove_node_from_graph_at_random(self.graph)
             # LAISSEZ FAIRE ZONE
             else:
-                x = randint(1,2)
-                if x % 2 == 0:
+                if randint(1, 2) % 2 == 0:
                     remove_node_from_graph_at_random(self.graph)
                 else:
-                    new_node = add_node_to_graph_at_random(self.graph)
+                    add_node_to_graph_at_random(self.graph)
 
             # reset the interval timer whichever branch ran, otherwise a graph
             # sitting at the min/max bound keeps generating on every tick
             self.last_generation_timestamp = now
-        
+
         # --------------------------------------------------
 
-        # construct pixmap
+        # advance the simulation and ask the drawing area to repaint
         #
-        pixmap = gtk.gdk.Pixmap(self.da.window, self.gw, self.gh, depth=-1)
-        
-        # draw white background
-        #
-        pixmap.draw_rectangle(self.style.white_gc, True, 0, 0, self.gw, self.gh)
-        
-        # call rot.iterate on pixmap        
-        #
-        self.force_directed_graph.iterate(pixmap, self.gc, self.style, NODE_LABEL_VERT_SPACING)        
-        
-        # draw pixmap to window
-        #
-        self.area.window.draw_drawable(self.gc, pixmap, 0, 0, 0, 0, -1, -1)  
-                
-        # show changes
-        #
-        self.area.show()
-      
-        return True # return True => repeat
+        self.force_directed_graph.step()
+        self.da.queue_draw()
+
+        return True  # return True => keep the timeout running

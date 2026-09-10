@@ -1,11 +1,17 @@
 import math
-import gtk
 from points import Point2D
 
 from constants import *
 
+# X11 colour names -> (r, g, b) in the 0..1 range cairo wants
+_RGB = {
+    'darkgreen': (0.0, 100 / 255.0, 0.0),
+    'black':     (0.0, 0.0, 0.0),
+    'blue':      (0.0, 0.0, 1.0),
+}
+
 class ForceDirectedGraph(object):
-        
+
     def __init__(self, graph=None, graphical_event_manager=None):
         self.graph = graph
         self.gem = graphical_event_manager
@@ -24,64 +30,59 @@ class ForceDirectedGraph(object):
         
         return (x0, y0)
 
-    def draw_to_pixmap(self, pixmap, gc, style, node_label_vert_spacing):
+    def render(self, cr, node_label_vert_spacing):
         '''
+        draw the current graph state onto the cairo context `cr`
         '''
-        # pixmap.draw_line(self.gc, x, y, self.w/2, self.h/2)  
 
         edge_colour = 'darkgreen'
         node_colour = 'darkgreen'
         text_colour = 'black'
-        
+
         selected_node_colour = 'blue'
-        edges_adj_to_selected_node_colour = 'blue'                
-        
+        edges_adj_to_selected_node_colour = 'blue'
+
         selected_node = None
         selected_nodes = [x for x in self.graph.nodes() if x.is_selected]
         if len(selected_nodes) > 0:
             selected_node = selected_nodes[0]
-        
+
         # EDGES
         #
+        cr.set_line_width(1.0)
         for (i, j) in self.graph.edges():
-            
-            if selected_node in [i, j]:
-                gc.set_foreground(pixmap.get_colormap().alloc_color(edges_adj_to_selected_node_colour))
-            else:
-                gc.set_foreground(pixmap.get_colormap().alloc_color(edge_colour))
-                
-            
-            pixmap.draw_line(gc, int(i.translated_position.x), int(i.translated_position.y), int(j.translated_position.x), int(j.translated_position.y))
 
+            if selected_node in (i, j):
+                cr.set_source_rgb(*_RGB[edges_adj_to_selected_node_colour])
+            else:
+                cr.set_source_rgb(*_RGB[edge_colour])
+
+            cr.move_to(i.translated_position.x, i.translated_position.y)
+            cr.line_to(j.translated_position.x, j.translated_position.y)
+            cr.stroke()
+
+        # NODES
+        #
         box_side = 4
+        cr.select_font_face("Sans")
+        cr.set_font_size(10)
         for node in self.graph.nodes():
-            
-            x = int(node.translated_position.x)
-            y = int(node.translated_position.y)
+
+            x = node.translated_position.x
+            y = node.translated_position.y
 
             is_selected = node.is_selected
 
-            # NODES
-            #
-
-            if is_selected:
-                gc.set_foreground(pixmap.get_colormap().alloc_color(selected_node_colour))    
-            else:        
-                gc.set_foreground(pixmap.get_colormap().alloc_color(node_colour))
-            
-            pixmap.draw_rectangle(gc, True, x - box_side, y - box_side, 2*box_side, 2*box_side)  
+            cr.set_source_rgb(*_RGB[selected_node_colour if is_selected else node_colour])
+            cr.rectangle(x - box_side, y - box_side, 2 * box_side, 2 * box_side)
+            cr.fill()
 
             # LABEL / TEXT
-            
-            if (self.gem.display_node_labels):            
-
-                if is_selected:
-                    gc.set_foreground(pixmap.get_colormap().alloc_color(selected_node_colour))    
-                else:        
-                    gc.set_foreground(pixmap.get_colormap().alloc_color(text_colour))            
-                
-                font = style.get_font()
-                pixmap.draw_text(font, gc, x, y - node_label_vert_spacing, node.label)
+            #
+            if self.gem.display_node_labels:
+                cr.set_source_rgb(*_RGB[selected_node_colour if is_selected else text_colour])
+                cr.move_to(x, y - node_label_vert_spacing)
+                cr.show_text(node.label)
 
     def net_electrostatic_force_at_node(self, tag_A):
         
@@ -229,17 +230,13 @@ class ForceDirectedGraph(object):
 
         return (xn, yn)
 
-    def iterate(self, pixmap, gc, style, node_label_vertical_spacing):
+    def step(self):
         '''
-        for each node
-            calc net electrostatic force
-            calc net spring force
-            calc displacement [impulse]
-            effect displacements
+        advance the simulation by one step:
+        for each node - net electrostatic force, net spring force, velocity,
+        displacement - then apply the displacement and translate to canvas
+        coordinates. Rendering is separate (see render()).
         '''
-        
-        # ------------------------------------
-        # FOR EACH NODE 
 
         # CALCULATE NET FORCE
         #
@@ -247,34 +244,30 @@ class ForceDirectedGraph(object):
             tag.net_electrostatic_force = self.net_electrostatic_force_at_node(tag)
 
         for tag in self.graph.nodes():
-            tag.net_spring_force = self.net_spring_force_at_node(tag)        
-        
+            tag.net_spring_force = self.net_spring_force_at_node(tag)
+
         # CALC VELOCITY
         #
         for tag in self.graph.nodes():
             tag.velocity = self.velocity_at_tag(tag)
-        
+
         # CALC DISPLACEMENT
         #
         for tag in self.graph.nodes():
             tag.displacement = self.displacement_at_node(tag)
-        
+
         # ADJUST POSITION
         #
         for tag in self.graph.nodes():
-            
+
             if tag.is_selected and self.gem.b1_down:
                 pass
             else:
                 (dx, dy) = tag.displacement
                 tag.position.x = tag.position.x + dx
-                tag.position.y = tag.position.y + dy            
-        
+                tag.position.y = tag.position.y + dy
+
         # TRANSLATE TO CANVAS
         #
         for node in self.graph.nodes():
             (node.translated_position.x, node.translated_position.y) = self.translate(node.position.x, node.position.y, W_0, H_0, W_1, H_1)
-        
-        # CALL RENDERING METHOD
-        #
-        self.draw_to_pixmap(pixmap, gc, style, node_label_vertical_spacing)
