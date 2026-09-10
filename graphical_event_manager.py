@@ -188,7 +188,7 @@ class GEM(object):
             # r2 = (x - mx0)^2 + (y - my0)^2      
             r2s[node] = math.pow(node.position.x - x0, 2) + math.pow(node.position.y - y0, 2)
            
-        for node in r2s.keys():
+        for node in list(r2s.keys()):
             r2 = r2s[node]
             if r2 > (MINIMUM_NODE_SELECTION_RADIUS * MINIMUM_NODE_SELECTION_RADIUS):
                 r2s.pop(node)
