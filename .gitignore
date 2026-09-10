@@ -8,6 +8,10 @@ __pycache__/
 venv/
 env/
 
-# Editor / OS cruft
+# Editor / IDE / OS cruft
 *~
 .DS_Store
+.project
+.pydevproject
+.idea/
+.vscode/
