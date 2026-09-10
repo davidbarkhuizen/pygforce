@@ -32,8 +32,8 @@ def calc_xy_for_new_node(graph):
     return (x,y)
 
 def add_edges_for_vertex_at_random(graph, node, max_edges_to_create_per_node_per_pass=2):
-    
-    nodes = graph.nodes()
+
+    nodes = list(graph.nodes())
     
     for j in range(randint(1, max_edges_to_create_per_node_per_pass)):
     
@@ -67,8 +67,8 @@ def generate_graph(p, max_edges_to_create_per_node_per_pass):
         tag.label = 'Node %i' % tag.idx
         g.add_node(tag)    
     
-    nodes = g.nodes()    
-    
+    nodes = list(g.nodes())
+
     for node in nodes:
         
         for j in range(randint(1, max_edges_to_create_per_node_per_pass)):
@@ -96,9 +96,9 @@ def add_node_to_graph_at_random(graph):
     return tag
 
 def remove_node_from_graph_at_random(graph):
-    
-    nodes = graph.nodes()            
-    idx = randint(0, len(nodes) - 1)            
+
+    nodes = list(graph.nodes())
+    idx = randint(0, len(nodes) - 1)
     node_to_remove = nodes[idx]
     
     graph.remove_node(node_to_remove)
