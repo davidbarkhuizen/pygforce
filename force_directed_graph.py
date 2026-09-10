@@ -154,27 +154,20 @@ class ForceDirectedGraph(object):
                 continue
             
             # PHYSICS CONSTANTS
-            #           
+            #
             k = SPRING_CONSTANT
             l = EQUILIBRIUM_DISPLACEMENT
-           
-            scalar_force = - k * (l - r)
-            
-            # DISTINGUISH BETWEEN PUSH & PULL VECTORS
-            #            
-            if scalar_force < 0:
-                (tag_A, tag_B) = (tag, other_tag)                
-            else:
-                (tag_A, tag_B) = (other_tag, tag)
-            
-            delta_x = tag_A.position.x - tag_B.position.x
-            delta_y = tag_A.position.y - tag_B.position.y
-            
-            sin_theta = delta_y / r
-            cos_theta = delta_x / r
-    
-            Fy = scalar_force * sin_theta
+
+            # k*(r - l): >0 when stretched (pull tag toward other_tag),
+            #            <0 when compressed (push tag away from other_tag)
+            scalar_force = k * (r - l)
+
+            # unit vector pointing from `tag` toward `other_tag`
+            cos_theta = (x_other - x_tag) / r
+            sin_theta = (y_other - y_tag) / r
+
             Fx = scalar_force * cos_theta
+            Fy = scalar_force * sin_theta
             
             Fy_net = Fy_net + Fy
             Fx_net = Fx_net + Fx
