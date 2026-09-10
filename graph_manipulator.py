@@ -1,5 +1,5 @@
 import networkx as nx
-from random import random, randint
+from random import random, randint, choice
 from node_tag import Tag
 from constants import *
 
@@ -33,20 +33,14 @@ def calc_xy_for_new_node(graph):
 
 def add_edges_for_vertex_at_random(graph, node, max_edges_to_create_per_node_per_pass=2):
 
-    nodes = list(graph.nodes())
-    
     for j in range(randint(1, max_edges_to_create_per_node_per_pass)):
-    
-        new_edge_added = False
-        while new_edge_added == False:
-            
-            edges = graph.edges()
-            
-            z = randint(0, len(nodes) - 1)
-            if nodes[z] != node:
-                if ((nodes[z], node) not in edges) and ((node, nodes[z]) not in edges):
-                    graph.add_edge(node, nodes[z])
-                    new_edge_added = True
+
+        # nodes not already joined to `node` (and not `node` itself)
+        candidates = [n for n in graph.nodes() if n != node and not graph.has_edge(node, n)]
+        if not candidates:
+            break
+
+        graph.add_edge(node, choice(candidates))
 
 def generate_graph(p, max_edges_to_create_per_node_per_pass):
     '''
@@ -70,18 +64,15 @@ def generate_graph(p, max_edges_to_create_per_node_per_pass):
     nodes = list(g.nodes())
 
     for node in nodes:
-        
+
         for j in range(randint(1, max_edges_to_create_per_node_per_pass)):
-        
-            new_edge_added = False
-            while new_edge_added == False:
-                
-                z = randint(0, len(nodes) - 1)
-                if nodes[z] != node:
-                    if ((nodes[z], node) not in g.edges()) and ((node, nodes[z]) not in g.edges()):
-                        g.add_edge(node, nodes[z])
-                        new_edge_added = True
-   
+
+            candidates = [n for n in nodes if n != node and not g.has_edge(node, n)]
+            if not candidates:
+                break
+
+            g.add_edge(node, choice(candidates))
+
     return g
 
 def add_node_to_graph_at_random(graph):
