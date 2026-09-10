@@ -203,7 +203,7 @@ class GEM(object):
         if (self.started != True):
             return True        
         
-        now = time.clock()
+        now = time.time()
 
         # ------------------------------------------------------------------------
 
@@ -212,7 +212,7 @@ class GEM(object):
         # HANDLE GENERATION ZERO
         #
         if not self.last_generation_timestamp:
-            self.last_generation_timestamp = time.clock()     
+            self.last_generation_timestamp = now
                
         # HANDLE SUBSEQUENT GENERATIONS
         #
