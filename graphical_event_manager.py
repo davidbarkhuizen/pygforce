@@ -257,11 +257,14 @@ class GEM(object):
             # LAISSEZ FAIRE ZONE
             else:
                 x = randint(1,2)
-                if x % 2 == 0:            
+                if x % 2 == 0:
                     remove_node_from_graph_at_random(self.graph)
                 else:
                     new_node = add_node_to_graph_at_random(self.graph)
-                self.last_generation_timestamp = now
+
+            # reset the interval timer whichever branch ran, otherwise a graph
+            # sitting at the min/max bound keeps generating on every tick
+            self.last_generation_timestamp = now
         
         # --------------------------------------------------
         
