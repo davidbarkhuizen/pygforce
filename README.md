@@ -8,18 +8,22 @@ David Barkhuizen — david.barkhuizen@gmail.com
 ## What it does
 
 `demo_pygforce.py` opens a GTK window showing a small semi-random graph
-(`DEMO_GRAPH_SIZE` nodes, generated with NetworkX) and runs a force-directed
-layout simulation — nodes repel, edges act as springs (`SPRING_CONSTANT`,
-`EQUILIBRIUM_DISPLACEMENT`, `FRICTION`, `TIME_STEP` in `constants.py`), stepped
-on a GLib timer tick and drawn with cairo.
+(`DEMO_GRAPH_SIZE` = 11 nodes, generated with NetworkX) and runs a force-directed
+layout simulation — nodes repel, edges act as springs — stepped on a GLib timer
+tick and drawn with cairo. Each step updates every node's velocity as
+`v = v * FRICTION + force * TIME_STEP` and then moves it by `v`, so an
+undisturbed layout settles rather than drifting. The tunable constants
+(`SPRING_CONSTANT`, `EQUILIBRIUM_DISPLACEMENT`, `FRICTION`, `TIME_STEP`, ...)
+live in `constants.py`.
 
 While it runs:
 
-- **Left-click** near a node toggles its selection; the selected node and its
-  adjacent edges are highlighted.
-- **Drag** a node with the mouse to reposition it.
-- **Tab** (in fact any key) toggles the node labels on and off.
-- Every few seconds (`GENERATION_INTERVAL`) the demo adds or removes a random
+- **Left-click** within `MINIMUM_NODE_SELECTION_RADIUS` of a node toggles its
+  selection; the selected node and its adjacent edges are drawn in blue.
+- **Drag** a node with the mouse to reposition it (its velocity is held at zero
+  while dragged).
+- **Tab** — in fact any key — toggles the node labels on and off.
+- Every `GENERATION_INTERVAL` seconds (5 s) the demo adds or removes a random
   node and its edges, keeping the node count between `DEMO_GRAPH_SIZE // 2` and
   `DEMO_GRAPH_SIZE * 2`.
 
@@ -45,6 +49,9 @@ headers are present.
 python3 demo_pygforce.py
 ```
 
+It needs an X11 or Wayland display; on a headless machine wrap it with
+`xvfb-run`.
+
 ## Layout
 
 | File | Role |
@@ -53,6 +60,9 @@ python3 demo_pygforce.py
 | `force_directed_graph.py` | Layout maths, coordinate transforms, `step()` (physics) and `render(cr)` (cairo drawing) |
 | `graphical_event_manager.py` | GTK 3 window and drawing area, mouse/keyboard handlers, timer tick |
 | `graph_manipulator.py` | Random graph generation and add/remove-node helpers |
-| `node_tag.py` | Per-node data (index, position, label, selection state) |
+| `node_tag.py` | Per-node data — index, position, label, per-step force/velocity/displacement, selection state |
 | `points.py` | 2D point helper |
 | `constants.py` | Window size, physics constants, demo parameters |
+
+`ProjectPlan.txt` tracks what is implemented and what is still on the backlog
+(selected-node info, multi-select, edge creation, graph centring).
