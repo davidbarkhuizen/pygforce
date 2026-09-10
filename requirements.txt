@@ -1,0 +1,3 @@
+# GTK 3 / PyGObject / pycairo are best installed from system packages -
+# see README.md. Only the pure-Python dependency is listed here.
+networkx>=2
