@@ -2,7 +2,7 @@ WIN_TITLE = 'PyGForce - Force-Directed Graphs in Python using NetworkX and pyGTK
 
 # DIMENSIONS OF PHASE SPACE
 W_0 = 600
-H_0 = int(float(W_0) / 1.0)
+H_0 = W_0  # square
 
 # PHYSICS CONSTANTS
 SPRING_CONSTANT = 0.1
@@ -12,7 +12,7 @@ FRICTION = 0.95
 
 # DIMENSIONS OF CANVAS
 W_1 = 700
-H_1 = int(float(W_1) / 1.0)
+H_1 = W_1  # square
 
 # VERT GAP BETWEEN NODE & LABEL
 NODE_LABEL_VERT_SPACING = 5

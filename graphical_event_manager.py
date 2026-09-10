@@ -28,17 +28,9 @@ class GEM(object):
         self.b1_down = False
         self.b2_down = False
         self.b3_down = False
-        
-        self.b1_x = None
-        self.b1_y = None
-        
-        self.mx = None
-        self.my = None
-        
+
         self.started = False
-        
-        self.i = 0
-        
+
         self.win = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.win.set_title(WIN_TITLE)
         self.gw = W_1
@@ -99,18 +91,10 @@ class GEM(object):
         
     def button_press_event(self, widget, event):                    
 
-        if (event.button == 1):                        
-            
-            # NOTE POSITION OF ORIGINAL CLICK
-            self.b1_x = event.x
-            self.b1_y = event.y
-            
+        if (event.button == 1):
+
             self.b1_down = True
-            
-            # should do node selection here
-            
-            self.last_b1_drag_position = (event.x, event.y)
-            
+
             self.handle_node_select_attempt(event.x, event.y)
             
             # translated x,y for button press canvaS x,y
@@ -174,8 +158,9 @@ class GEM(object):
 
         return True   
 
-    def on_key_press_event(self, widget, event):        
+    def on_key_press_event(self, widget, event):
         self.display_node_labels = not self.display_node_labels
+        return True
 
     def handle_node_select_attempt(self, x1, y1):
         
@@ -187,7 +172,7 @@ class GEM(object):
             # r2 = (x - mx0)^2 + (y - my0)^2      
             r2s[node] = math.pow(node.position.x - x0, 2) + math.pow(node.position.y - y0, 2)
            
-        for node in r2s.keys():
+        for node in list(r2s.keys()):
             r2 = r2s[node]
             if r2 > (MINIMUM_NODE_SELECTION_RADIUS * MINIMUM_NODE_SELECTION_RADIUS):
                 r2s.pop(node)
@@ -219,19 +204,9 @@ class GEM(object):
             return True        
         
         now = time.clock()
-        
+
         # ------------------------------------------------------------------------
-        
-        # CALC POINTER POSITION
-        #
-        
-#        (mx0, my0) = (0,0)
-#        if self.mx and self.my:
-#            mx0, my0 = self.force_directed_graph.reverse(self.mx, self.my, W_0, H_0, W_1, H_1)
-#            print('Pointer (x0,y0) = (%i, %i), (x1,y1) = (%i, %i)' % (mx0, my0, self.mx, self.my))
-        
-        # ------------------------------------------------------------------------        
-        
+
         # PERIOIDIC INTERFERENCE WITH SIMULATION - ADD/REMOVE NODE @ RANDOM
         #
         # HANDLE GENERATION ZERO
@@ -267,28 +242,7 @@ class GEM(object):
             self.last_generation_timestamp = now
         
         # --------------------------------------------------
-        
-        # print('\n'*80)
-        
-        # REPORT POINTER POSITION        
-        #
-        #print('(W0, H0) = %i, %i | (W1, H1) = %i, %i' % (W_0, H_0, W_1, H_1))
-        
-        # REPORT ON NODES
-        #        
-        #print(' ' + ('Idx').rjust(5) + ('x0').rjust(10) + ' ' + ('y0').rjust(10) + ('x1').rjust(10) + ' ' + ('y1').rjust(10))
-        for tag in sorted(self.graph.nodes(), key = lambda x : x.idx):
-            
-            x = tag.position.x
-            y = tag.position.y
-            idx = tag.idx
-            
-            tx, ty = self.force_directed_graph.translate(x, y, W_0, H_0, W_1, H_1)
-            
-            selected_token = '*' if tag.is_selected else ' '
-            
-            #print(selected_token + ' ' + ('%i' % idx).rjust(5) + ' ' + ('%.2f' % x).rjust(10) + ' ' + ('%.2f' % y).rjust(10)+ ' ' + ('%.2f' % tx).rjust(10) + ' ' + ('%.2f' % ty).rjust(10))
-        
+
         # construct pixmap
         #
         pixmap = gtk.gdk.Pixmap(self.da.window, self.gw, self.gh, depth=-1)

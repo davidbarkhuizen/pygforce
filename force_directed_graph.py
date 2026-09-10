@@ -58,16 +58,12 @@ class ForceDirectedGraph(object):
             
             x = int(node.translated_position.x)
             y = int(node.translated_position.y)
-            
-            COLOURS = ['red', 'green', 'blue', 'purple', 'red_float', 'green_float', 'blue_float']
 
-            gc.set_foreground(pixmap.get_colormap().alloc_color("brown")) 
+            is_selected = node.is_selected
 
-            is_selected = node.is_selected 
-            
-            # NODES 
+            # NODES
             #
-            
+
             if is_selected:
                 gc.set_foreground(pixmap.get_colormap().alloc_color(selected_node_colour))    
             else:        
