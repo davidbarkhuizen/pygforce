@@ -1,0 +1,13 @@
+# Python bytecode / caches
+*.pyc
+*.pyo
+__pycache__/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Editor / OS cruft
+*~
+.DS_Store
