@@ -64,5 +64,24 @@ It needs an X11 or Wayland display; on a headless machine wrap it with
 | `points.py` | 2D point helper |
 | `constants.py` | Window size, physics constants, demo parameters |
 
-`ProjectPlan.txt` tracks what is implemented and what is still on the backlog
-(selected-node info, multi-select, edge creation, graph centring).
+## Status
+
+### Implemented
+
+- Generate a semi-random test graph
+- Per-node physics each step — net force, velocity update, displacement
+- Draw the graph
+- Event-based time simulation, periodically adding / removing a random node
+  (with its edges) while keeping the node count within bounds
+- Select a node with the mouse — single node, left-click to toggle; the selected
+  node and its adjacent edges are drawn in the selection colour
+- Drag the selected node — its position follows the pointer
+- Toggle node labels — press Tab (any key)
+
+### Backlog
+
+- **Selected-node info** — show the selected node's full tag info, degree and
+  neighbours (console first, later a panel / widgets)
+- **Multiple selection**
+- **Adding edges** — select two nodes, add an edge
+- **Centre the graph** — compute and use the centre of mass
