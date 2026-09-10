@@ -28,17 +28,9 @@ class GEM(object):
         self.b1_down = False
         self.b2_down = False
         self.b3_down = False
-        
-        self.b1_x = None
-        self.b1_y = None
-        
-        self.mx = None
-        self.my = None
-        
+
         self.started = False
-        
-        self.i = 0
-        
+
         self.win = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.win.set_title(WIN_TITLE)
         self.gw = W_1
@@ -99,18 +91,10 @@ class GEM(object):
         
     def button_press_event(self, widget, event):                    
 
-        if (event.button == 1):                        
-            
-            # NOTE POSITION OF ORIGINAL CLICK
-            self.b1_x = event.x
-            self.b1_y = event.y
-            
+        if (event.button == 1):
+
             self.b1_down = True
-            
-            # should do node selection here
-            
-            self.last_b1_drag_position = (event.x, event.y)
-            
+
             self.handle_node_select_attempt(event.x, event.y)
             
             # translated x,y for button press canvaS x,y
@@ -220,19 +204,9 @@ class GEM(object):
             return True        
         
         now = time.clock()
-        
+
         # ------------------------------------------------------------------------
-        
-        # CALC POINTER POSITION
-        #
-        
-#        (mx0, my0) = (0,0)
-#        if self.mx and self.my:
-#            mx0, my0 = self.force_directed_graph.reverse(self.mx, self.my, W_0, H_0, W_1, H_1)
-#            print('Pointer (x0,y0) = (%i, %i), (x1,y1) = (%i, %i)' % (mx0, my0, self.mx, self.my))
-        
-        # ------------------------------------------------------------------------        
-        
+
         # PERIOIDIC INTERFERENCE WITH SIMULATION - ADD/REMOVE NODE @ RANDOM
         #
         # HANDLE GENERATION ZERO
