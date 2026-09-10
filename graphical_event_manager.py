@@ -220,7 +220,7 @@ class GEM(object):
             
             node_count = len(self.graph.nodes())
             
-            min_node_count = DEMO_GRAPH_SIZE / 2
+            min_node_count = DEMO_GRAPH_SIZE // 2
             max_node_count = DEMO_GRAPH_SIZE * 2
             
             # LOWER BOUND ON NODE COUNT
