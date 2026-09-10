@@ -174,8 +174,9 @@ class GEM(object):
 
         return True   
 
-    def on_key_press_event(self, widget, event):        
+    def on_key_press_event(self, widget, event):
         self.display_node_labels = not self.display_node_labels
+        return True
 
     def handle_node_select_attempt(self, x1, y1):
         
