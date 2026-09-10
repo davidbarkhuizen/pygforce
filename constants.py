@@ -7,8 +7,11 @@ H_0 = W_0  # square
 # PHYSICS CONSTANTS
 SPRING_CONSTANT = 0.1
 EQUILIBRIUM_DISPLACEMENT = 30
-TIME_STEP = 0.8
-FRICTION = 0.95
+# velocity update is  v = v * FRICTION + force * TIME_STEP,  then  pos += v.
+# Keep TIME_STEP / (1 - FRICTION) small (~1) so the layout settles instead
+# of oscillating or flinging nodes off-canvas.
+TIME_STEP = 0.1
+FRICTION = 0.9
 
 # DIMENSIONS OF CANVAS
 W_1 = 700

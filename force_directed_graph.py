@@ -188,25 +188,17 @@ class ForceDirectedGraph(object):
 
     def displacement_at_node(self, tag):
         '''
-        ERROR - DISPLACEMENT IS NOT USING VELOCITY
-        '''        
-        eX, eY = tag.net_electrostatic_force
-        sX, sY = tag.net_spring_force
-        
-        nX = eX + sX
-        nY = eY + sY 
-        
-        displacement = (nX, nY)
-        
-        return displacement    
+        Per-step displacement is the node's current velocity - which
+        velocity_at_tag() has already damped with FRICTION and scaled by
+        TIME_STEP. step() computes velocity before calling this.
+        '''
+        return tag.velocity
 
     def velocity_at_tag(self, tag):
         '''
-        ERROR !! VELOCITY IS NOT BEING USED TO DETERMINED DISPLACEMENT, ONLY NET FORCE
-        
-        V_new = (V_old * Friction) + (current NET FORCE * TIME_STEP)
+        V_new = (V_old * FRICTION) + (current net force * TIME_STEP)
         '''
-        
+
         (xf, yf) = self.net_force_at_node(tag)
         
         # RECORD PREVIOUS VELOCITY
@@ -254,7 +246,9 @@ class ForceDirectedGraph(object):
         for tag in self.graph.nodes():
 
             if tag.is_selected and self.gem.b1_down:
-                pass
+                # node is being dragged: hold it, and bleed off momentum so it
+                # doesn't get flung when the mouse is released
+                tag.velocity = (0.0, 0.0)
             else:
                 (dx, dy) = tag.displacement
                 tag.position.x = tag.position.x + dx
